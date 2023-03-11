@@ -50,6 +50,7 @@
             // cityLabel
             // 
             this.cityLabel.AutoSize = true;
+            this.cityLabel.ForeColor = System.Drawing.SystemColors.Control;
             this.cityLabel.Location = new System.Drawing.Point(39, 15);
             this.cityLabel.Name = "cityLabel";
             this.cityLabel.Size = new System.Drawing.Size(0, 15);
@@ -58,6 +59,7 @@
             // temperatureLabel
             // 
             this.temperatureLabel.AutoSize = true;
+            this.temperatureLabel.ForeColor = System.Drawing.SystemColors.Control;
             this.temperatureLabel.Location = new System.Drawing.Point(84, 39);
             this.temperatureLabel.Name = "temperatureLabel";
             this.temperatureLabel.Size = new System.Drawing.Size(0, 15);
@@ -66,6 +68,7 @@
             // descriptionLabel
             // 
             this.descriptionLabel.AutoSize = true;
+            this.descriptionLabel.ForeColor = System.Drawing.SystemColors.Control;
             this.descriptionLabel.Location = new System.Drawing.Point(78, 64);
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(0, 15);
@@ -74,6 +77,7 @@
             // humidityLabel
             // 
             this.humidityLabel.AutoSize = true;
+            this.humidityLabel.ForeColor = System.Drawing.SystemColors.Control;
             this.humidityLabel.Location = new System.Drawing.Point(68, 88);
             this.humidityLabel.Name = "humidityLabel";
             this.humidityLabel.Size = new System.Drawing.Size(0, 15);
@@ -92,6 +96,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.ForeColor = System.Drawing.SystemColors.Control;
             this.label1.Location = new System.Drawing.Point(2, 15);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 15);
@@ -101,6 +106,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.ForeColor = System.Drawing.SystemColors.Control;
             this.label2.Location = new System.Drawing.Point(2, 39);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
@@ -110,6 +116,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.SystemColors.Control;
             this.label3.Location = new System.Drawing.Point(2, 64);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(70, 15);
@@ -119,6 +126,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.ForeColor = System.Drawing.SystemColors.Control;
             this.label4.Location = new System.Drawing.Point(2, 88);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 15);
@@ -129,6 +137,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);

@@ -14,6 +14,9 @@ namespace WeatherAPI
             [JsonProperty("name")]
             public string? City { get; set; }
 
+            [JsonProperty("sys")]
+            public LocationInfo? Location { get; set; }
+
             [JsonProperty("weather")]
             public WeatherDescription[]? Weather { get; set; }
 

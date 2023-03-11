@@ -2,11 +2,10 @@ using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Forms;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Threading;
 using static WeatherAPI.API;
+using Newtonsoft.Json.Linq;
 
 namespace WeatherAPI
 {
@@ -36,17 +35,41 @@ namespace WeatherAPI
                     string json = await response.Content.ReadAsStringAsync();
                     WeatherInfo? info = JsonConvert.DeserializeObject<WeatherInfo>(json);
 
-                    cityLabel.Text = info?.City;
+                    JObject jsonQuery = JObject.Parse(json);
+                    string country = jsonQuery["sys"]["country"].ToString();
+                    
+                    // if the country is the united states, display the state as well
+                    if (country == "US")
+                    {
+                        country = country + jsonQuery["sys"]["state"].ToString();
+                    }
+
+                    if (jsonQuery == null)
+                    {
+                        country = "";
+                    }
+
+                    cityLabel.Text = $"{info?.City}, {country}";
                     temperatureLabel.Text = $"{info?.WeatherDetails?.Temperature}°C";
                     descriptionLabel.Text = info?.Weather?[0].Description;
                     humidityLabel.Text = $"{info?.WeatherDetails?.Humidity}%";
+
                     // Celcius to Fahrenheit
                     if (temperatureLabel.Text != null)
                     {
-                        double temp = Convert.ToDouble(temperatureLabel.Text.Substring(0, temperatureLabel.Text.Length - 2));
+                        double temp = Convert.ToDouble(temperatureLabel.Text[0..^2]);
                         double fahrenheit = (temp * 9 / 5) + 32;
                         fahrenheit = Math.Round(fahrenheit, 1);
                         temperatureLabel.Text = $"{fahrenheit}°F";
+                    }
+
+                    //Make the first character of the description uppercase, and new words start with uppercase after a space
+                    if (descriptionLabel.Text != null)
+                    {
+                        string description = descriptionLabel.Text;
+                        description = description.Substring(0, 1).ToUpper() + description[1..];
+                        description = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(description);
+                        descriptionLabel.Text = description;
                     }
                 }
                 catch (Exception ex)
