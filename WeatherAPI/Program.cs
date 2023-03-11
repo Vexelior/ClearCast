@@ -1,3 +1,6 @@
+using System;
+using System.Windows.Forms;
+
 namespace WeatherAPI
 {
     internal static class Program
@@ -10,7 +13,10 @@ namespace WeatherAPI
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
+            // Initialize the application.
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            // Start the application.
             Application.Run(new Form1());
         }
     }
