@@ -1,11 +1,14 @@
 using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using static WeatherAPI.API;
 using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace WeatherAPI
 {
@@ -41,7 +44,20 @@ namespace WeatherAPI
                     // if the country is the united states, display the state as well
                     if (country == "US")
                     {
-                        country = country + jsonQuery["sys"]["state"].ToString();
+                        // Using the coordinates, find the state
+                        string lat = jsonQuery["coord"]["lat"].ToString();
+                        string lon = jsonQuery["coord"]["lon"].ToString();
+                        UriBuilder builder2 = new("https://api.bigdatacloud.net/data/reverse-geocode-client");
+                        builder2.Query = $"latitude={lat}&longitude={lon}&localityLanguage=en";
+                        HttpResponseMessage response2 = await client.GetAsync(builder2.ToString());
+                        string json2 = await response2.Content.ReadAsStringAsync();
+                        JObject jsonQuery2 = JObject.Parse(json2);
+                        string state = jsonQuery2["principalSubdivision"].ToString();
+                        country = $"{state}, {country}";
+                    }
+                    else if (string.IsNullOrEmpty(country))
+                    {
+                        country = "";
                     }
 
                     if (jsonQuery == null)
@@ -96,8 +112,9 @@ namespace WeatherAPI
                 {
                     string json = await response.Content.ReadAsStringAsync();
                     LocationInfo? info = JsonConvert.DeserializeObject<LocationInfo>(json);
-                    city = info?.City ?? "";
-
+                    // Search through the json file to find the city
+                    JObject jsonQuery = JObject.Parse(json);
+                    city = jsonQuery["city"].ToString();
                 }
                 catch (Exception ex)
                 {
