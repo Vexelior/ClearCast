@@ -14,21 +14,29 @@ namespace WeatherAPI
 {
     public partial class Form1 : Form
     {
+        public string? UserCity { get; set; }
+
         private const string OpenWeatherMapApiKey = "49c8545070487501c919486dbf8afdaf";
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
-        public string? UserCity { get; set; }
 
         public Form1()
         {
             InitializeComponent();
+            // Display the user's weather based on their geolocation. \\
             SearchByLocation();
         }
 
-        private async void FindWeatherDetails(string city)
+        private async void FindWeatherDetails(string city, string region, string country)
         {
+            // Create a list to store the city, region and country. \\
+            List<string> locationDetails = new();
+            locationDetails.Add(city);
+            locationDetails.Add(region);
+            locationDetails.Add(country);
+
             using HttpClient client = new();
             UriBuilder builder = new(OpenWeatherMapApiUrl);
-            builder.Query = $"q={city}&appid={OpenWeatherMapApiKey}&units=metric";
+            builder.Query = $"q={city},{region},{country}&appid={OpenWeatherMapApiKey}&units=metric";
             HttpResponseMessage response = await client.GetAsync(builder.ToString());
 
             if (response.IsSuccessStatusCode)
@@ -38,39 +46,21 @@ namespace WeatherAPI
                     string json = await response.Content.ReadAsStringAsync();
                     WeatherInfo? info = JsonConvert.DeserializeObject<WeatherInfo>(json);
 
-                    JObject jsonQuery = JObject.Parse(json);
-                    string country = jsonQuery["sys"]["country"].ToString();
-                    
-                    // if the country is the united states, display the state as well
-                    if (country == "US")
+                    // Display the region and country. \\
+                    if (locationDetails[1] != null && locationDetails[2] != null)
                     {
-                        // Using the coordinates, find the state
-                        string lat = jsonQuery["coord"]["lat"].ToString();
-                        string lon = jsonQuery["coord"]["lon"].ToString();
-                        UriBuilder builder2 = new("https://api.bigdatacloud.net/data/reverse-geocode-client");
-                        builder2.Query = $"latitude={lat}&longitude={lon}&localityLanguage=en";
-                        HttpResponseMessage response2 = await client.GetAsync(builder2.ToString());
-                        string json2 = await response2.Content.ReadAsStringAsync();
-                        JObject jsonQuery2 = JObject.Parse(json2);
-                        string state = jsonQuery2["principalSubdivision"].ToString();
-                        country = $"{state}, {country}";
+                        cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}, {locationDetails[2]}";
                     }
-                    else if (string.IsNullOrEmpty(country))
+                    else
                     {
-                        country = "";
+                        cityLabel.Text = $"{locationDetails[0]}, null, null";
                     }
 
-                    if (jsonQuery == null)
-                    {
-                        country = "";
-                    }
-
-                    cityLabel.Text = $"{info?.City}, {country}";
                     temperatureLabel.Text = $"{info?.WeatherDetails?.Temperature}°C";
                     descriptionLabel.Text = info?.Weather?[0].Description;
                     humidityLabel.Text = $"{info?.WeatherDetails?.Humidity}%";
 
-                    // Celcius to Fahrenheit
+                    // Celcius to Fahrenheit conversion. \\
                     if (temperatureLabel.Text != null)
                     {
                         double temp = Convert.ToDouble(temperatureLabel.Text[0..^2]);
@@ -79,7 +69,7 @@ namespace WeatherAPI
                         temperatureLabel.Text = $"{fahrenheit}°F";
                     }
 
-                    //Make the first character of the description uppercase, and new words start with uppercase after a space
+                    // Make the first character of the description uppercase, and new words start with uppercase after a space. \\
                     if (descriptionLabel.Text != null)
                     {
                         string description = descriptionLabel.Text;
@@ -99,10 +89,9 @@ namespace WeatherAPI
             }
         }
 
-        // Create a method that gets the user's geolocation and returns the city name
-        private static async Task<string> GetUserLocation()
+        private static async Task<List<string>> GetUserLocation()
         {
-            string city = "";
+            List<string> locationInfo = new();
             using HttpClient client = new();
             UriBuilder builder = new("https://ipinfo.io/json");
             HttpResponseMessage response = await client.GetAsync(builder.ToString());
@@ -112,9 +101,15 @@ namespace WeatherAPI
                 {
                     string json = await response.Content.ReadAsStringAsync();
                     LocationInfo? info = JsonConvert.DeserializeObject<LocationInfo>(json);
-                    // Search through the json file to find the city
+                    // Search through the json file to find the city. \\
                     JObject jsonQuery = JObject.Parse(json);
-                    city = jsonQuery["city"].ToString();
+                    string city = jsonQuery["city"].ToString();
+                    string region = jsonQuery["region"].ToString();
+                    string country = jsonQuery["country"].ToString();
+
+                    locationInfo.Add(city);
+                    locationInfo.Add(region);
+                    locationInfo.Add(country);
                 }
                 catch (Exception ex)
                 {
@@ -125,29 +120,92 @@ namespace WeatherAPI
             {
                 MessageBox.Show("Error retrieving location information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            return city;
+            return locationInfo;
         }
 
-        private void Search(object sender, EventArgs e)
+        private async void SearchByLocation()
+        {
+            List<string> city = await GetUserLocation();
+
+            if (city != null)
+            {
+                // Find possible region and country for the city entered. \\
+                FindWeatherDetails(city[0], city[1], city[2]);
+            }
+            else
+            {
+                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void Search(object sender, EventArgs e)
         {
             string city = cityTextBox.Text;
 
             if (!string.IsNullOrEmpty(city))
             {
-                FindWeatherDetails(city);
+                List<string> locationDetails = await LocationDetails(city);
+                FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+            }
+            else 
+            {
+                MessageBox.Show("Please enter a city.", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private async void SearchByLocation()
+        private static async Task<List<string>> LocationDetails(string city)
         {
-            string city = await GetUserLocation();
+            List<string> locationDetails = new();
 
-            if (string.IsNullOrEmpty(city))
+            using HttpClient client = new();
+            UriBuilder builder = new(OpenWeatherMapApiUrl);
+            builder.Query = $"q={city}&appid={OpenWeatherMapApiKey}&units=metric";
+            HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
+
+            if (response.IsSuccessStatusCode)
             {
-                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    // Get the longitude and latitude of the city entered. \\
+                    string json = await response.Content.ReadAsStringAsync();
+                    JObject jsonQuery = JObject.Parse(json);
+                    string longitude = jsonQuery["coord"]["lon"].ToString();
+                    string latitude = jsonQuery["coord"]["lat"].ToString();
+
+                    // From the longitude and latitude, find the region and country. \\
+                    UriBuilder builder2 = new("https://api.bigdatacloud.net/data/reverse-geocode-client");
+                    builder2.Query = $"latitude={latitude}&longitude={longitude}&localityLanguage=en";
+                    HttpResponseMessage response2 = client.GetAsync(builder2.ToString()).Result;
+
+                    if (response2.IsSuccessStatusCode)
+                    {
+                        string json2 = await response2.Content.ReadAsStringAsync();
+                        JObject jsonQuery2 = JObject.Parse(json2);
+                        city = jsonQuery2["city"].ToString();
+                        string region = jsonQuery2["principalSubdivision"].ToString();
+                        string country = jsonQuery2["continentCode"].ToString();
+
+                        if (country == "NA")
+                        {
+                            country = "US";
+                        }
+
+                        locationDetails.Add(city);
+                        locationDetails.Add(region);
+                        locationDetails.Add(country);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            FindWeatherDetails(city);
+            return locationDetails;
         }
     }
 }

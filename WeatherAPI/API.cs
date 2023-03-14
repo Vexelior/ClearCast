@@ -46,6 +46,12 @@ namespace WeatherAPI
         {
             [JsonProperty("city")]
             public string? City { get; set; }
+
+            [JsonProperty("region")]
+            public string? Region { get; set; }
+
+            [JsonProperty("country")]
+            public string? Country { get; set; }
         }
     }
 }

@@ -38,7 +38,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.suggestionsListBox = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // cityTextBox
@@ -134,23 +133,12 @@
             this.label4.TabIndex = 10;
             this.label4.Text = "Humidity:";
             // 
-            // suggestionsListBox
-            // 
-            this.suggestionsListBox.FormattingEnabled = true;
-            this.suggestionsListBox.ItemHeight = 15;
-            this.suggestionsListBox.Location = new System.Drawing.Point(456, 39);
-            this.suggestionsListBox.Name = "suggestionsListBox";
-            this.suggestionsListBox.Size = new System.Drawing.Size(332, 94);
-            this.suggestionsListBox.TabIndex = 11;
-            this.suggestionsListBox.Visible = false;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.suggestionsListBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -180,6 +168,5 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ListBox suggestionsListBox;
     }
 }
