@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net;
 using static WeatherAPI.API;
+using System.Windows.Threading;
 
 namespace WeatherAPI
 {
@@ -15,14 +16,20 @@ namespace WeatherAPI
     {
         public string? UserCity { get; set; }
 
+        private readonly DispatcherTimer timer;
+
         private const string OpenWeatherMapApiKey = "49c8545070487501c919486dbf8afdaf";
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
 
         public Form1()
         {
             InitializeComponent();
-            // Display the user's weather based on their geolocation. \\
             SearchByLocation();
+
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -222,7 +229,7 @@ namespace WeatherAPI
                 {
                     string json = client.DownloadString($"https://api.teleport.org/api/cities/?search={city}");
                     JObject jsonQuery = JObject.Parse(json);
-                    JArray cities = (JArray)jsonQuery["_embedded"]["city:search-results"];
+                    JArray? cities = jsonQuery["_embedded"]["city:search-results"] as JArray;
 
                     // Display the list of cities in a listbox. \\
                     cityListBox.Items.Clear();
@@ -292,6 +299,11 @@ namespace WeatherAPI
         {
             cityTextBox.Text = cityListBox.SelectedItem.ToString();
             cityListBox.Visible = false;
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
         }
     }
 }

@@ -39,6 +39,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.cityListBox = new System.Windows.Forms.ListBox();
+            this.timeLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cityTextBox
@@ -146,12 +147,22 @@
             this.cityListBox.Visible = false;
             this.cityListBox.SelectedIndexChanged += new System.EventHandler(this.cityListBox_SelectedIndexChanged);
             // 
+            // timeLabel
+            // 
+            this.timeLabel.AutoSize = true;
+            this.timeLabel.ForeColor = System.Drawing.SystemColors.Control;
+            this.timeLabel.Location = new System.Drawing.Point(492, 426);
+            this.timeLabel.Name = "timeLabel";
+            this.timeLabel.Size = new System.Drawing.Size(0, 15);
+            this.timeLabel.TabIndex = 12;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.timeLabel);
             this.Controls.Add(this.cityListBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -183,5 +194,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ListBox cityListBox;
+        private System.Windows.Forms.Label timeLabel;
     }
 }
