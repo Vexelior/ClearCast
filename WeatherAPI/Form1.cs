@@ -6,8 +6,8 @@ using System.Windows.Forms;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using static WeatherAPI.API;
 using System.Net;
+using static WeatherAPI.API;
 
 namespace WeatherAPI
 {

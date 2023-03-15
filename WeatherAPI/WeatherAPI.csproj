@@ -9,16 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="data\city.list.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="data\city.list.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <FrameworkReference Include="Microsoft.WindowsDesktop.App" />
   </ItemGroup>
