@@ -1,14 +1,13 @@
 using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-using static WeatherAPI.API;
 using Newtonsoft.Json.Linq;
-using System.Linq;
 using System.Collections.Generic;
+using static WeatherAPI.API;
+using System.Net;
 
 namespace WeatherAPI
 {
@@ -146,8 +145,10 @@ namespace WeatherAPI
             {
                 List<string> locationDetails = await LocationDetails(city);
                 FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+
+                cityTextBox.Clear();
             }
-            else 
+            else
             {
                 MessageBox.Show("Please enter a city.", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -206,6 +207,91 @@ namespace WeatherAPI
             }
 
             return locationDetails;
+        }
+
+        private void cityTextBox_TextChanged(object sender, EventArgs e)
+        {
+            string city = cityTextBox.Text;
+
+            // Call an API to retrieve a list of cities that match the user's input. \\
+            if (!string.IsNullOrEmpty(city))
+            {
+                using WebClient client = new();
+
+                try
+                {
+                    string json = client.DownloadString($"https://api.teleport.org/api/cities/?search={city}");
+                    JObject jsonQuery = JObject.Parse(json);
+                    JArray cities = (JArray)jsonQuery["_embedded"]["city:search-results"];
+
+                    // Display the list of cities in a listbox. \\
+                    cityListBox.Items.Clear();
+                    foreach (JObject cityObject in cities)
+                    {
+                        string cityName = cityObject["matching_full_name"].ToString();
+
+                        // In the matching_full_name, remove the country name. This is usually after the second comma. \\
+                        if (cityName.Contains(","))
+                        {
+                            // Try to find a comma after the first comma. Remove it and everything after it. \\
+                            int index = cityName.IndexOf(",", cityName.IndexOf(",") + 1);
+                            if (index > 0)
+                            {
+                                cityName = cityName.Remove(index);
+                            }
+                        }
+
+                        cityListBox.Items.Add(cityName);
+
+                        // Get the total number of cities in the list. \\
+                        List<string> cityList = new();
+
+                        foreach (string item in cityListBox.Items)
+                        {
+                            cityList.Add(item);
+                        }
+
+                        // If there is more than one comma, remove it and everything after it. \\
+                        if (cityList.Count > 0)
+                        {
+                            for (int i = 0; i < cityList.Count; i++)
+                            {
+                                if (cityList[i].Contains(","))
+                                {
+                                    // Try to find a comma after the first comma. \\
+                                    int index = cityList[i].IndexOf(",", cityList[i].IndexOf(",") + 1);
+                                    if (index > 0)
+                                    {
+                                        cityList[i] = cityList[i].Remove(index);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    cityListBox.Visible = true;
+
+                    // Mouseleave event to hide the listbox when the user clicks outside of it. \\
+                    cityListBox.MouseLeave += (s, e) =>
+                    {
+                        cityListBox.Visible = false;
+                    };
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            else
+            {
+                cityListBox.Visible = false;
+            }
+        }
+
+        private void cityListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            cityTextBox.Text = cityListBox.SelectedItem.ToString();
+            cityListBox.Visible = false;
         }
     }
 }

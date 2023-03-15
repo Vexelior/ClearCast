@@ -38,6 +38,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.cityListBox = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // cityTextBox
@@ -46,6 +47,7 @@
             this.cityTextBox.Name = "cityTextBox";
             this.cityTextBox.Size = new System.Drawing.Size(332, 23);
             this.cityTextBox.TabIndex = 0;
+            this.cityTextBox.TextChanged += new System.EventHandler(this.cityTextBox_TextChanged);
             // 
             // cityLabel
             // 
@@ -133,12 +135,24 @@
             this.label4.TabIndex = 10;
             this.label4.Text = "Humidity:";
             // 
+            // cityListBox
+            // 
+            this.cityListBox.FormattingEnabled = true;
+            this.cityListBox.ItemHeight = 15;
+            this.cityListBox.Location = new System.Drawing.Point(456, 41);
+            this.cityListBox.Name = "cityListBox";
+            this.cityListBox.Size = new System.Drawing.Size(332, 94);
+            this.cityListBox.TabIndex = 11;
+            this.cityListBox.Visible = false;
+            this.cityListBox.SelectedIndexChanged += new System.EventHandler(this.cityListBox_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.cityListBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -168,5 +182,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ListBox cityListBox;
     }
 }
