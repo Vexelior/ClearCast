@@ -1,9 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WeatherAPI
 {
@@ -13,6 +8,9 @@ namespace WeatherAPI
         {
             [JsonProperty("name")]
             public string? City { get; set; }
+
+            [JsonProperty("sys")]
+            public LocationInfo? Location { get; set; }
 
             [JsonProperty("weather")]
             public WeatherDescription[]? Weather { get; set; }
@@ -43,6 +41,15 @@ namespace WeatherAPI
         {
             [JsonProperty("city")]
             public string? City { get; set; }
+
+            [JsonProperty("region")]
+            public string? Region { get; set; }
+
+            [JsonProperty("country")]
+            public string? Country { get; set; }
+
+            [JsonProperty("post code")]
+            public string? Zipcode { get; set; }
         }
     }
 }
