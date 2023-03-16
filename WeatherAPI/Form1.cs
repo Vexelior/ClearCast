@@ -7,10 +7,8 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net;
-using static WeatherAPI.API;
 using System.Windows.Threading;
-using System.Text.Json;
-using System.IO;
+using static WeatherAPI.API;
 
 namespace WeatherAPI
 {
@@ -109,6 +107,7 @@ namespace WeatherAPI
             using HttpClient client = new();
             UriBuilder builder = new("https://ipinfo.io/json");
             HttpResponseMessage response = await client.GetAsync(builder.ToString());
+
             if (response.IsSuccessStatusCode)
             {
                 try
