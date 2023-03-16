@@ -47,6 +47,9 @@ namespace WeatherAPI
 
             [JsonProperty("country")]
             public string? Country { get; set; }
+
+            [JsonProperty("post code")]
+            public string? Zipcode { get; set; }
         }
     }
 }
