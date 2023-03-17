@@ -59,13 +59,24 @@ namespace WeatherAPI
                     WeatherInfo? info = JsonConvert.DeserializeObject<WeatherInfo>(json);
 
                     // Display the region and country. \\
-                    if (locationDetails[1] != null && locationDetails[2] != null)
+                    if (locationDetails != null)
                     {
-                        cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}, {locationDetails[2]}";
+                        if (country == "United States")
+                        {
+                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}, {locationDetails[2]}";
+                        }
+                        else if (country != "United States")
+                        {
+                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[2]}";
+                        }
+                        else
+                        {
+                            cityLabel.Text = $"{locationDetails[0]}";
+                        }
                     }
                     else
                     {
-                        cityLabel.Text = $"{locationDetails[0]}, null, null";
+                        cityLabel.Text = $"{locationDetails[0]}";
                     }
 
                     temperatureLabel.Text = $"{info?.WeatherDetails?.Temperature}°C";
@@ -92,7 +103,7 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding weather details!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error finding weather details!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -126,7 +137,7 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding geolocation!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error finding geolocation!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -145,10 +156,6 @@ namespace WeatherAPI
             {
                 // Find possible region and country for the city entered. \\
                 FindWeatherDetails(city[0], city[1], city[2]);
-            }
-            else
-            {
-                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -194,7 +201,7 @@ namespace WeatherAPI
             }
             else
             {
-                MessageBox.Show("Please enter a city.", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             cityTextBox.Clear();
@@ -208,6 +215,10 @@ namespace WeatherAPI
 
             using HttpClient client = new();
             UriBuilder builder = new(OpenWeatherMapApiUrl);
+            /*
+             * Need to add a condition for foreign country postal codes.
+             * 
+             */
             builder.Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric";
             HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
 
@@ -221,12 +232,21 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    locationDetails.Add(city);
+                    locationDetails.Add(region);
+                    locationDetails.Add(country);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             return locationDetails;
@@ -249,7 +269,7 @@ namespace WeatherAPI
             // If the country is not US, use the GeoNames API to find the zip code. \\
             if (country != "us")
             {
-                return await GetGeoNamesZipCode(city, region, country);
+                return GetGeoNamesZipCode(city, country);
             }
 
 
@@ -271,60 +291,95 @@ namespace WeatherAPI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!" ,MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!" ,MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             dynamic? json = JsonConvert.DeserializeObject(result);
             zipCode = json.places[0]["post code"];
 
-            if (string.IsNullOrEmpty(zipCode))
+            return zipCode;
+        }
+
+        private static string GetGeoNamesZipCode(string city, string country)
+        {
+            const string API_KEY = "0f84326655f746d78c9c5c9552756925";
+            string countryName = GetCountryCode(country.ToUpper());
+
+            // Capitalize the first letter of the city. \\
+            city = city[0].ToString().ToUpper() + city[1..];
+
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={API_KEY}&language=en&pretty=1";
+            string? zipCode = "";
+            
+            try
             {
-                zipCode = "null";
-                MessageBox.Show($"Error finding zipcode!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                using HttpClient client = new();
+                UriBuilder builder = new(url);
+                HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
+                string result = response.Content.ReadAsStringAsync().Result;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                // Loop through the results and find the zip code. \\
+                foreach (var item in JObject.Parse(result)["results"])
+                {
+                    // If the first item in the JSON array under "components" matches both the city and country, return the zip code. \\
+                    if (item["components"]["city"]?.ToString() == city && item["components"]["country"]?.ToString() == countryName)
+                    {
+                        // Get the longitude and latitude of the city and use the OpenWeatherMap API to find the zip code. \\
+                        string lat = item["geometry"]["lat"].ToString();
+                        string lng = item["geometry"]["lng"].ToString();
+                        zipCode = GetCountryZipCode(lat, lng);
+                        break;
+                    }
+                
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return zipCode;
         }
 
-        private static Task<string> GetGeoNamesZipCode(string city, string region, string country)
+        private static string GetCountryZipCode(string lat, string lng)
         {
-            /*
-            *
-            * This method is not working. I am getting a 400 error when I try to use the GeoNames API.
-            * Need to figure out why or find a different API to use.
-            *
-            */
-            string url = $"http://api.geonames.org/postalCodeSearchJSON?placename={city}&adminCode1={region}&country={country}&username=weatherapp";
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key=0f84326655f746d78c9c5c9552756925&language=en&pretty=1";
             string? zipCode = "";
-            string result = "";
 
             try
             {
                 using HttpClient client = new();
                 UriBuilder builder = new(url);
                 HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
-                result = response.Content.ReadAsStringAsync().Result;
+                string result = response.Content.ReadAsStringAsync().Result;
 
                 if (!response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+                // Loop through the results and find the zip code. \\
+                foreach (var item in JObject.Parse(result)["results"])
+                {
+                    // If the first item in the JSON array under "components" matches both the city and country, return the zip code. \\
+                    if (item["components"]["postcode"] != null)
+                    {
+                        zipCode = item["components"]["postcode"].ToString();
+                        break;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            dynamic? json = JsonConvert.DeserializeObject(result);
-            zipCode = json.postalCodes[0].postalCode;
-
-            if (string.IsNullOrEmpty(zipCode))
-            {
-                zipCode = "null";
-                MessageBox.Show($"Error finding zipcode!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            return Task.FromResult(zipCode);
+            return zipCode;
         }
 
         private static string GetCountryCode(string country)
@@ -699,10 +754,34 @@ namespace WeatherAPI
                     {
                         cityListBox.Visible = false;
                     };
+
+                    // Allow the user to use the arrow keys to select a city. \\
+                    cityListBox.KeyDown += (s, e) =>
+                    {
+                        if (e.KeyCode == Keys.Down)
+                        {
+                            if (cityListBox.SelectedIndex < cityListBox.Items.Count - 1)
+                            {
+                                cityListBox.SelectedIndex++;
+                            }
+                        }
+                        else if (e.KeyCode == Keys.Up)
+                        {
+                            if (cityListBox.SelectedIndex > 0)
+                            {
+                                cityListBox.SelectedIndex--;
+                            }
+                        }
+                        else if (e.KeyCode == Keys.Enter)
+                        {
+                            cityTextBox.Text = cityListBox.SelectedItem.ToString();
+                            cityListBox.Visible = false;
+                        }
+                    };
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding cities!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error finding cities!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
