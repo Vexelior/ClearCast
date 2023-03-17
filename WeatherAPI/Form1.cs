@@ -288,18 +288,20 @@ namespace WeatherAPI
 
         private static Task<string> GetGeoNamesZipCode(string city, string region, string country)
         {
-            string countryName = country.ToUpper();
-            countryName = GetCountryCode(countryName);
-            // Get the lat and long for the city entered. \\
-            string latlongUrl = $"http://api.geonames.org/searchJSON?q={city}&country={countryName}&username=vexelior";
-            string? lat = "";
-            string? lng = "";
+            /*
+            *
+            * This method is not working. I am getting a 400 error when I try to use the GeoNames API.
+            * Need to figure out why or find a different API to use.
+            *
+            */
+            string url = $"http://api.geonames.org/postalCodeSearchJSON?placename={city}&adminCode1={region}&country={country}&username=weatherapp";
+            string? zipCode = "";
             string result = "";
 
             try
             {
                 using HttpClient client = new();
-                UriBuilder builder = new(latlongUrl);
+                UriBuilder builder = new(url);
                 HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
                 result = response.Content.ReadAsStringAsync().Result;
 
@@ -314,33 +316,7 @@ namespace WeatherAPI
             }
 
             dynamic? json = JsonConvert.DeserializeObject(result);
-            lat = json.geonames[0].lat;
-            lng = json.geonames[0].lng;
-
-            // Get the zip code for the lat and long. \\
-            string url = $"http://api.geonames.org/findNearbyPostalCodesJSON?lat={lat}&lng={lng}&username=vexelior";
-            string? zipCode = "";
-            string newResult = "";
-
-            try
-            {
-                using HttpClient client = new();
-                UriBuilder builder = new(url);
-                HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
-                newResult = response.Content.ReadAsStringAsync().Result;
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            dynamic? convJson = JsonConvert.DeserializeObject(result);
-            zipCode = convJson.postalCodes[0].postalCode;
+            zipCode = json.postalCodes[0].postalCode;
 
             if (string.IsNullOrEmpty(zipCode))
             {
