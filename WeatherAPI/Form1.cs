@@ -574,7 +574,7 @@ namespace WeatherAPI
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+            timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " - " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
         }
     }
 }
