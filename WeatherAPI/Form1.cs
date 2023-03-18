@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Windows.Threading;
 using static WeatherAPI.API;
+using System.Linq;
 
 namespace WeatherAPI
 {
@@ -36,6 +37,36 @@ namespace WeatherAPI
 
             // Allow enter to be pressed to call the function from the text box. \\
             cityTextBox.KeyDown += SearchBox_KeyDown;
+
+            // Mouseleave event to hide the listbox when the user clicks outside of it. \\
+            cityListBox.MouseLeave += (s, e) =>
+            {
+                cityListBox.Visible = false;
+            };
+
+            // Allow the user to use the arrow keys to select a city. \\
+            cityListBox.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Down)
+                {
+                    if (cityListBox.SelectedIndex < cityListBox.Items.Count - 1)
+                    {
+                        cityListBox.SelectedIndex++;
+                    }
+                }
+                else if (e.KeyCode == Keys.Up)
+                {
+                    if (cityListBox.SelectedIndex > 0)
+                    {
+                        cityListBox.SelectedIndex--;
+                    }
+                }
+                else if (e.KeyCode == Keys.Enter)
+                {
+                    cityTextBox.Text = cityListBox.SelectedItem.ToString();
+                    cityListBox.Visible = false;
+                }
+            };
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -61,17 +92,13 @@ namespace WeatherAPI
                     // Display the region and country. \\
                     if (locationDetails != null)
                     {
-                        if (country == "United States")
+                        if (country == "United States" || country == "US")
                         {
-                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}, {locationDetails[2]}";
+                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}";
                         }
-                        else if (country != "United States")
+                        else if (country != "United States" || country != "US")
                         {
                             cityLabel.Text = $"{locationDetails[0]}, {locationDetails[2]}";
-                        }
-                        else
-                        {
-                            cityLabel.Text = $"{locationDetails[0]}";
                         }
                     }
                     else
@@ -385,258 +412,19 @@ namespace WeatherAPI
         private static string GetCountryCode(string country)
         {
             string code = "";
+            string url = $"https://restcountries.com/v3.1/name/{country}";
 
-            Dictionary<string, string> countries = new()
-            {
-                { "Afghanistan", "AF" },
-                { "Åland Islands", "AX" },
-                { "Albania", "AL" },
-                { "Algeria", "DZ" },
-                { "American Samoa", "AS" },
-                { "Andorra", "AD" },
-                { "Angola", "AO" },
-                { "Anguilla", "AI" },
-                { "Antarctica", "AQ" },
-                { "Antigua and Barbuda", "AG" },
-                { "Argentina", "AR" },
-                { "Armenia", "AM" },
-                { "Aruba", "AW" },
-                { "Australia", "AU" },
-                { "Austria", "AT" },
-                { "Azerbaijan", "AZ" },
-                { "Bahamas", "BS" },
-                { "Bahrain", "BH" },
-                { "Bangladesh", "BD" },
-                { "Barbados", "BB" },
-                { "Belarus", "BY" },
-                { "Belgium", "BE" },
-                { "Belize", "BZ" },
-                { "Benin", "BJ" },
-                { "Bermuda", "BM" },
-                { "Bhutan", "BT" },
-                { "Bolivia, Plurinational State of", "BO" },
-                { "Bonaire, Sint Eustatius and Saba", "BQ" },
-                { "Bosnia and Herzegovina", "BA" },
-                { "Botswana", "BW" },
-                { "Bouvet Island", "BV" },
-                { "Brazil", "BR" },
-                { "British Indian Ocean Territory", "IO" },
-                { "Brunei Darussalam", "BN" },
-                { "Bulgaria", "BG" },
-                { "Burkina Faso", "BF" },
-                { "Burundi", "BI" },
-                { "Cambodia", "KH" },
-                { "Cameroon", "CM" },
-                { "Canada", "CA" },
-                { "Cape Verde", "CV" },
-                { "Cayman Islands", "KY" },
-                { "Central African Republic", "CF" },
-                { "Chad", "TD" },
-                { "Chile", "CL" },
-                { "China", "CN" },
-                { "Christmas Island", "CX" },
-                { "Cocos (Keeling) Islands", "CC" },
-                { "Colombia", "CO" },
-                { "Comoros", "KM" },
-                { "Congo", "CG" },
-                { "Congo, the Democratic Republic of the", "CD" },
-                { "Cook Islands", "CK" },
-                { "Costa Rica", "CR" },
-                { "Côte d'Ivoire", "CI" },
-                { "Croatia", "HR" },
-                { "Cuba", "CU" },
-                { "Curaçao", "CW" },
-                { "Cyprus", "CY" },
-                { "Czech Republic", "CZ" },
-                { "Denmark", "DK" },
-                { "Djibouti", "DJ" },
-                { "Dominica", "DM" },
-                { "Dominican Republic", "DO" },
-                { "Ecuador", "EC" },
-                { "Greece", "GR" },
-                { "Greenland", "GL" },
-                { "Grenada", "GD" },
-                { "Guadeloupe", "GP" },
-                { "Guam", "GU" },
-                { "Guatemala", "GT" },
-                { "Guernsey", "GG" },
-                { "Guinea", "GN" },
-                { "Guinea-Bissau", "GW" },
-                { "Guyana", "GY" },
-                { "Haiti", "HT" },
-                { "Heard Island and McDonald Islands", "HM" },
-                { "Holy See", "VA" },
-                { "Honduras", "HN" },
-                { "Hong Kong", "HK" },
-                { "Hungary", "HU" },
-                { "Iceland", "IS" },
-                { "India", "IN" },
-                { "Indonesia", "ID" },
-                { "Iran, Islamic Republic of", "IR" },
-                { "Iraq", "IQ" },
-                { "Ireland", "IE" },
-                { "Isle of Man", "IM" },
-                { "Israel", "IL" },
-                { "Italy", "IT" },
-                { "Jamaica", "JM" },
-                { "Japan", "JP" },
-                { "Jersey", "JE" },
-                { "Jordan", "JO" },
-                { "Kazakhstan", "KZ" },
-                { "Kenya", "KE" },
-                { "Kiribati", "KI" },
-                { "Korea, Democratic People's Republic of", "KP" },
-                { "Korea, Republic of", "KR" },
-                { "Kuwait", "KW" },
-                { "Kyrgyzstan", "KG" },
-                { "Lao People's Democratic Republic", "LA" },
-                { "Latvia", "LV" },
-                { "Lebanon", "LB" },
-                { "Lesotho", "LS" },
-                { "Liberia", "LR" },
-                { "Libya", "LY" },
-                { "Liechtenstein", "LI" },
-                { "Lithuania", "LT" },
-                { "Luxembourg", "LU" },
-                { "Macao", "MO" },
-                { "Macedonia, the former Yugoslav Republic of", "MK" },
-                { "Madagascar", "MG" },
-                { "Malawi", "MW" },
-                { "Malaysia", "MY" },
-                { "Maldives", "MV" },
-                { "Mali", "ML" },
-                { "Malta", "MT" },
-                { "Marshall Islands", "MH" },
-                { "Martinique", "MQ" },
-                { "Mauritania", "MR" },
-                { "Mauritius", "MU" },
-                { "Mayotte", "YT" },
-                { "Mexico", "MX" },
-                { "Micronesia, Federated States of", "FM" },
-                { "Moldova, Republic of", "MD" },
-                { "Monaco", "MC" },
-                { "Mongolia", "MN" },
-                { "Montenegro", "ME" },
-                { "Montserrat", "MS" },
-                { "Morocco", "MA" },
-                { "Mozambique", "MZ" },
-                { "Myanmar", "MM" },
-                { "Namibia", "NA" },
-                { "Nauru", "NR" },
-                { "Nepal", "NP" },
-                { "Netherlands", "NL" },
-                { "New Caledonia", "NC" },
-                { "New Zealand", "NZ" },
-                { "Nicaragua", "NI" },
-                { "Niger", "NE" },
-                { "Nigeria", "NG" },
-                { "Niue", "NU" },
-                { "Norfolk Island", "NF" },
-                { "Northern Mariana Islands", "MP" },
-                { "Norway", "NO" },
-                { "Oman", "OM" },
-                { "Pakistan", "PK" },
-                { "Palau", "PW" },
-                { "Palestine, State of", "PS" },
-                { "Panama", "PA" },
-                { "Papua New Guinea", "PG" },
-                { "Paraguay", "PY" },
-                { "Peru", "PE" },
-                { "Philippines", "PH" },
-                { "Pitcairn", "PN" },
-                { "Poland", "PL" },
-                { "Portugal", "PT" },
-                { "Puerto Rico", "PR" },
-                { "Qatar", "QA" },
-                { "Réunion", "RE" },
-                { "Romania", "RO" },
-                { "Russian Federation", "RU" },
-                { "Rwanda", "RW" },
-                { "Saint Barthélemy", "BL" },
-                { "Saint Helena, Ascension and Tristan da Cunha", "SH" },
-                { "Saint Kitts and Nevis", "KN" },
-                { "Saint Lucia", "LC" },
-                { "Saint Martin(French part)", "MF" },
-                { "Saint Pierre and Miquelon", "PM" },
-                { "Saint Vincent and the Grenadines", "VC" },
-                { "Samoa", "WS" },
-                { "San Marino", "SM" },
-                { "Sao Tome and Principe", "ST" },
-                { "Saudi Arabia", "SA" },
-                { "Senegal", "SN" },
-                { "Serbia", "RS" },
-                { "Seychelles", "SC" },
-                { "Sierra Leone", "SL" },
-                { "Singapore", "SG" },
-                { "Sint Maarten(Dutch part)", "SX" },
-                { "Slovakia", "SK" },
-                { "Slovenia", "SI" },
-                { "Solomon Islands", "SB" },
-                { "Somalia", "SO" },
-                { "South Africa", "ZA" },
-                { "South Georgia and the South Sandwich Islands", "GS" },
-                { "South Sudan", "SS" },
-                { "Spain", "ES" },
-                { "Sri Lanka", "LK" },
-                { "Sudan", "SD" },
-                { "Suriname", "SR" },
-                { "Svalbard and Jan Mayen", "SJ" },
-                { "Swaziland", "SZ" },
-                { "Sweden", "SE" },
-                { "Switzerland", "CH" },
-                { "Syrian Arab Republic", "SY" },
-                { "Taiwan, Province of China", "TW" },
-                { "Tajikistan", "TJ" },
-                { "Tanzania, United Republic of", "TZ" },
-                { "Thailand", "TH" },
-                { "Timor-Leste", "TL" },
-                { "Togo", "TG" },
-                { "Tokelau", "TK" },
-                { "Tonga", "TO" },
-                { "Trinidad and Tobago", "TT" },
-                { "Tunisia", "TN" },
-                { "Turkey", "TR" },
-                { "Turkmenistan", "TM" },
-                { "Turks and Caicos Islands", "TC" },
-                { "Tuvalu", "TV" },
-                { "Uganda", "UG" },
-                { "Ukraine", "UA" },
-                { "United Arab Emirates", "AE" },
-                { "United Kingdom", "GB" },
-                { "United States", "US" },
-                { "United States Minor Outlying Islands", "UM" },
-                { "Uruguay", "UY" },
-                { "Uzbekistan", "UZ" },
-                { "Vanuatu", "VU" },
-                { "Venezuela, Bolivarian Republic of", "VE" },
-                { "Viet Nam", "VN" },
-                { "Virgin Islands, British", "VG" },
-                { "Virgin Islands, U.S.", "VI" },
-                { "Wallis and Futuna", "WF" },
-                { "Western Sahara", "EH" },
-                { "Yemen", "YE" },
-                { "Zambia", "ZM" },
-                { "Zimbabwe", "ZW" }
-            };
+            using HttpClient client = new();
+            using HttpResponseMessage response = client.GetAsync(url).Result;
 
-            if (country.Length == 2)
+            if (response.IsSuccessStatusCode)
             {
-                foreach (KeyValuePair<string, string> value in countries)
+                string content = response.Content.ReadAsStringAsync().Result;
+                JArray countryData = JArray.Parse(content);
+
+                if (countryData.Count > 0)
                 {
-                    if (value.Value == country)
-                    {
-                        code = value.Key;
-                    }
-                }
-            }
-            else
-            {
-                foreach (KeyValuePair<string, string> value in countries)
-                {
-                    if (value.Key == country)
-                    {
-                        code = value.Value;
-                    }
+                    code = countryData[0]["cca2"].ToString();
                 }
             }
 
@@ -748,36 +536,6 @@ namespace WeatherAPI
                     }
 
                     cityListBox.Visible = true;
-
-                    // Mouseleave event to hide the listbox when the user clicks outside of it. \\
-                    cityListBox.MouseLeave += (s, e) =>
-                    {
-                        cityListBox.Visible = false;
-                    };
-
-                    // Allow the user to use the arrow keys to select a city. \\
-                    cityListBox.KeyDown += (s, e) =>
-                    {
-                        if (e.KeyCode == Keys.Down)
-                        {
-                            if (cityListBox.SelectedIndex < cityListBox.Items.Count - 1)
-                            {
-                                cityListBox.SelectedIndex++;
-                            }
-                        }
-                        else if (e.KeyCode == Keys.Up)
-                        {
-                            if (cityListBox.SelectedIndex > 0)
-                            {
-                                cityListBox.SelectedIndex--;
-                            }
-                        }
-                        else if (e.KeyCode == Keys.Enter)
-                        {
-                            cityTextBox.Text = cityListBox.SelectedItem.ToString();
-                            cityListBox.Visible = false;
-                        }
-                    };
                 }
                 catch (Exception ex)
                 {
