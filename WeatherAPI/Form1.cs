@@ -130,12 +130,12 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding weather details!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage("Error retrieving weather information.");
             }
         }
 
@@ -164,12 +164,12 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding geolocation!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error finding location details!\n\n{ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Error retrieving location information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage("Error retrieving location information.");
             }
 
             return locationInfo;
@@ -223,12 +223,19 @@ namespace WeatherAPI
 
             if (!string.IsNullOrEmpty(city))
             {
-                List<string> locationDetails = await LocationDetails(city, region, country);
-                FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+                try
+                {
+                    List<string> locationDetails = await LocationDetails(city, region, country);
+                    FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
+                }
             }
             else
             {
-                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage("Please enter a city.");
             }
 
             cityTextBox.Clear();
@@ -249,31 +256,11 @@ namespace WeatherAPI
             builder.Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric";
             HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
 
-            if (response.IsSuccessStatusCode)
+            if (response != null)
             {
-                try
-                {
-                    locationDetails.Add(city);
-                    locationDetails.Add(region);
-                    locationDetails.Add(country);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                try
-                {
-                    locationDetails.Add(city);
-                    locationDetails.Add(region);
-                    locationDetails.Add(country);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                locationDetails.Add(city);
+                locationDetails.Add(region);
+                locationDetails.Add(country);
             }
 
             return locationDetails;
@@ -313,12 +300,12 @@ namespace WeatherAPI
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage("Error retrieving zip code.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!" ,MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage($"Error retrieving zip code!\n\n{ex.Message}");
             }
 
             dynamic? json = JsonConvert.DeserializeObject(result);
@@ -347,7 +334,7 @@ namespace WeatherAPI
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage("Error finding zipcode.");
                 }
 
                 // Loop through the results and find the zip code. \\
@@ -367,7 +354,7 @@ namespace WeatherAPI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage($"Error finding zipcode!\n\n{ex.Message}");
             }
 
             return zipCode;
@@ -387,7 +374,7 @@ namespace WeatherAPI
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage("Error finding zipcode.");
                 }
 
                 // Loop through the results and find the zip code. \\
@@ -403,7 +390,7 @@ namespace WeatherAPI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage($"Error finding zipcode!\n\n{ex.Message}");
             }
 
             return zipCode;
@@ -428,10 +415,14 @@ namespace WeatherAPI
                 }
             }
 
+            if (string.IsNullOrEmpty(code))
+            {
+                ErrorMessage("Error retrieving country code.");
+            }
+
             return code;
         }
 
-        // Create a similar method above to get the state code, United States Only. \\
         private static string GetStateCode(string state)
         {
             string code = string.Empty;
@@ -539,7 +530,7 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding cities!\n\n{ex.Message}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error retrieving cities!\n\n{ex.Message}");
                 }
             }
             else
@@ -575,6 +566,14 @@ namespace WeatherAPI
         private void Timer_Tick(object? sender, EventArgs e)
         {
             timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " - " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+        }
+
+        private static void ErrorMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                MessageBox.Show(message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
