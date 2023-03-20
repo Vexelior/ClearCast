@@ -15,9 +15,6 @@ namespace WeatherAPI
 {
     public partial class Form1 : Form
     {
-        // Timer Object. \\
-        private readonly DispatcherTimer timer;
-
         // API Info. \\
         private const string OpenWeatherMapApiKey = "49c8545070487501c919486dbf8afdaf";
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
@@ -27,14 +24,6 @@ namespace WeatherAPI
             InitializeComponent();
             SearchByLocation();
 
-            // Timer logic. \\
-            timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += Timer_Tick;
-            timer.Start();
-
             // Allow enter to be pressed to call the function from the text box. \\
             cityTextBox.KeyDown += SearchBox_KeyDown;
 
@@ -42,30 +31,6 @@ namespace WeatherAPI
             cityListBox.MouseLeave += (s, e) =>
             {
                 cityListBox.Visible = false;
-            };
-
-            // Allow the user to use the arrow keys to select a city. \\
-            cityListBox.KeyDown += (s, e) =>
-            {
-                if (e.KeyCode == Keys.Down)
-                {
-                    if (cityListBox.SelectedIndex < cityListBox.Items.Count - 1)
-                    {
-                        cityListBox.SelectedIndex++;
-                    }
-                }
-                else if (e.KeyCode == Keys.Up)
-                {
-                    if (cityListBox.SelectedIndex > 0)
-                    {
-                        cityListBox.SelectedIndex--;
-                    }
-                }
-                else if (e.KeyCode == Keys.Enter)
-                {
-                    cityTextBox.Text = cityListBox.SelectedItem.ToString();
-                    cityListBox.Visible = false;
-                }
             };
         }
 
@@ -561,11 +526,6 @@ namespace WeatherAPI
                     Search(sender, e);
                 }
             }
-        }
-
-        private void Timer_Tick(object? sender, EventArgs e)
-        {
-            timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " - " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
         }
 
         private static void ErrorMessage(string message)

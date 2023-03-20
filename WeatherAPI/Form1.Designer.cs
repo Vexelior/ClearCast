@@ -146,7 +146,6 @@
             this.cityListBox.Size = new System.Drawing.Size(332, 94);
             this.cityListBox.TabIndex = 11;
             this.cityListBox.Visible = false;
-            this.cityListBox.SelectedIndexChanged += new System.EventHandler(this.CityListBox_SelectedIndexChanged);
             // 
             // timeLabel
             // 
