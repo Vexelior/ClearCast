@@ -489,7 +489,8 @@ namespace WeatherAPI
                             {
                                 cityTextBox.Focus();
                             }
-                            else
+
+                            if (ev.KeyCode == Keys.Up || ev.KeyCode == Keys.Down)
                             {
                                 cityListBox.Focus();
                             }
@@ -516,6 +517,7 @@ namespace WeatherAPI
                             {
                                 cityTextBox.Text = cityListBox.SelectedItem.ToString();
                                 cityListBox.Visible = false;
+                                Search(cityTextBox.Text, e);
                             }
 
                             if (ev.KeyCode == Keys.Down)
@@ -549,9 +551,13 @@ namespace WeatherAPI
 
         private static void ErrorMessage(string message)
         {
-            if (string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message))
             {
                 MessageBox.Show(message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                MessageBox.Show("Error creating error message!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }
