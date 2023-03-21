@@ -83,6 +83,15 @@ namespace WeatherAPI
                         description = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(description);
                         descriptionLabel.Text = description;
                     }
+
+                    // If there is an instance of PleaseWaitForm, close it. \\
+                    if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
+                    {
+                        Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
+                    }
+
+                    searchButton.Enabled = true;
+                    searchButton.Cursor = Cursors.Hand;
                 }
                 catch (Exception ex)
                 {
@@ -148,6 +157,12 @@ namespace WeatherAPI
             string region = "";
             string country = "";
 
+            ShowLoadingMessage();
+
+            // Disable the search button. \\
+            searchButton.Enabled = false;
+            searchButton.Cursor = Cursors.No;
+
             // If there is a comma in the city name, split the string into city and region. \\
             if (cityTextBox.Text.Contains(","))
             {
@@ -177,7 +192,11 @@ namespace WeatherAPI
                 city = cityTextBox.Text;
             }
 
-            if (!string.IsNullOrEmpty(city))
+            if (string.IsNullOrEmpty(city))
+            {
+                ErrorMessage("Please enter a city.");
+            }
+            else
             {
                 try
                 {
@@ -188,10 +207,6 @@ namespace WeatherAPI
                 {
                     ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
                 }
-            }
-            else
-            {
-                ErrorMessage("Please enter a city.");
             }
 
             cityTextBox.Clear();
@@ -547,6 +562,20 @@ namespace WeatherAPI
             {
                 cityListBox.Visible = false;
             }
+        }
+
+        private static void ShowLoadingMessage()
+        {
+            PleaseWaitForm loadingForm = new();
+
+            // If there is more than one instance of PleaseWaitForm, close it. \\
+            if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
+            {
+                Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
+            }
+
+            // Show the PleaseWaitForm. \\
+            loadingForm.Show();
         }
 
         private static void ErrorMessage(string message)

@@ -94,7 +94,6 @@
             this.searchButton.TabIndex = 6;
             this.searchButton.Text = "Search";
             this.searchButton.UseVisualStyleBackColor = true;
-            this.searchButton.Click += new System.EventHandler(this.Search);
             // 
             // label1
             // 
@@ -140,7 +139,7 @@
             // 
             this.cityListBox.FormattingEnabled = true;
             this.cityListBox.ItemHeight = 15;
-            this.cityListBox.Location = new System.Drawing.Point(456, 41);
+            this.cityListBox.Location = new System.Drawing.Point(456, 30);
             this.cityListBox.Name = "cityListBox";
             this.cityListBox.Size = new System.Drawing.Size(332, 94);
             this.cityListBox.TabIndex = 11;
