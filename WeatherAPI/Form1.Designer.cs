@@ -49,7 +49,6 @@
             this.cityTextBox.Size = new System.Drawing.Size(332, 23);
             this.cityTextBox.TabIndex = 0;
             this.cityTextBox.TextChanged += new System.EventHandler(this.CityTextBox_TextChanged);
-            this.cityTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SearchBox_KeyDown);
             // 
             // cityLabel
             // 
@@ -146,7 +145,6 @@
             this.cityListBox.Size = new System.Drawing.Size(332, 94);
             this.cityListBox.TabIndex = 11;
             this.cityListBox.Visible = false;
-            this.cityListBox.SelectedIndexChanged += new System.EventHandler(this.CityListBox_SelectedIndexChanged);
             // 
             // timeLabel
             // 

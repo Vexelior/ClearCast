@@ -23,15 +23,6 @@ namespace WeatherAPI
         {
             InitializeComponent();
             SearchByLocation();
-
-            // Allow enter to be pressed to call the function from the text box. \\
-            cityTextBox.KeyDown += SearchBox_KeyDown;
-
-            // Mouseleave event to hide the listbox when the user clicks outside of it. \\
-            cityListBox.MouseLeave += (s, e) =>
-            {
-                cityListBox.Visible = false;
-            };
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -251,7 +242,7 @@ namespace WeatherAPI
             string url = $"https://api.zippopotam.us/{country}/{region}/{city}";
             string? zipCode = "";
             string result = "";
-            
+
             try
             {
                 using HttpClient client = new();
@@ -285,7 +276,7 @@ namespace WeatherAPI
 
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={API_KEY}&language=en&pretty=1";
             string? zipCode = "";
-            
+
             try
             {
                 using HttpClient client = new();
@@ -310,7 +301,7 @@ namespace WeatherAPI
                         zipCode = GetCountryZipCode(lat, lng);
                         break;
                     }
-                
+
                 }
             }
             catch (Exception ex)
@@ -488,6 +479,62 @@ namespace WeatherAPI
                     }
 
                     cityListBox.Visible = true;
+
+                    if (cityListBox.Visible == true)
+                    {
+                        // While the user is typing that is not the up and down arrow keys, focus the textbox, otherwise focus the listbox. \\
+                        cityTextBox.KeyDown += (s, ev) =>
+                        {
+                            if (ev.KeyCode != Keys.Up && ev.KeyCode != Keys.Down)
+                            {
+                                cityTextBox.Focus();
+                            }
+                            else
+                            {
+                                cityListBox.Focus();
+                            }
+                        };
+
+                        // Disable the up and down arrow keys from moving the cursor in the city textbox. \\
+                        cityTextBox.KeyDown += (s, ev) =>
+                        {
+                            if (ev.KeyCode == Keys.Up || ev.KeyCode == Keys.Down)
+                            {
+                                ev.SuppressKeyPress = true;
+                            }
+                        };
+
+                        // Get the index of the selected item. \\
+                        int index = cityListBox.SelectedIndex;
+                        // Set the index of the selected item to 0. \\
+                        cityListBox.SelectedIndex = 0;
+
+                        // Create an event handler for selecting an item in the list with the arrow keys. \\
+                        cityListBox.KeyDown += (s, ev) =>
+                        {
+                            if (ev.KeyCode == Keys.Enter)
+                            {
+                                cityTextBox.Text = cityListBox.SelectedItem.ToString();
+                                cityListBox.Visible = false;
+                            }
+
+                            if (ev.KeyCode == Keys.Down)
+                            {
+                                index++;
+                            }
+
+                            if (ev.KeyCode == Keys.Up)
+                            {
+                                index--;
+                            }
+                        };
+
+                        // Mouseleave event to hide the listbox when the user clicks outside of it. \\
+                        cityListBox.MouseLeave += (s, ev) =>
+                        {
+                            cityListBox.Visible = false;
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -497,30 +544,6 @@ namespace WeatherAPI
             else
             {
                 cityListBox.Visible = false;
-            }
-        }
-
-        private void CityListBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            cityTextBox.Text = cityListBox.SelectedItem.ToString();
-            cityListBox.Visible = false;
-        }
-
-        private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
-        {
-            // Check if the pressed key is the enter key. \\
-            if (e.KeyCode == Keys.Enter)
-            {
-                // If sender is null, return. \\
-                if (sender == null)
-                {
-                    return;
-                }
-                else
-                {
-                    // Otherwise, call the search method. \\
-                    Search(sender, e);
-                }
             }
         }
 
