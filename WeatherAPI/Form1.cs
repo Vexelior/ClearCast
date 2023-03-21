@@ -214,10 +214,6 @@ namespace WeatherAPI
 
             using HttpClient client = new();
             UriBuilder builder = new(OpenWeatherMapApiUrl);
-            /*
-             * Need to add a condition for foreign country postal codes.
-             * 
-             */
             builder.Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric";
             HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
 
