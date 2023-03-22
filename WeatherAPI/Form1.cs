@@ -23,6 +23,9 @@ namespace WeatherAPI
         {
             InitializeComponent();
             SearchByLocation();
+
+            // Allow enter to be pressed to call the function from the text box. \\
+            cityTextBox.KeyDown += SearchBox_KeyDown;
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -532,7 +535,6 @@ namespace WeatherAPI
                             {
                                 cityTextBox.Text = cityListBox.SelectedItem.ToString();
                                 cityListBox.Visible = false;
-                                Search(cityTextBox.Text, e);
                             }
 
                             if (ev.KeyCode == Keys.Down)
@@ -561,6 +563,24 @@ namespace WeatherAPI
             else
             {
                 cityListBox.Visible = false;
+            }
+        }
+
+        private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
+        {
+            // Check if the pressed key is the enter key. \\
+            if (e.KeyCode == Keys.Enter)
+            {
+                // If sender is null, return. \\
+                if (sender == null)
+                {
+                    return;
+                }
+                else
+                {
+                    // Otherwise, call the search method. \\
+                    Search(sender, e);
+                }
             }
         }
 

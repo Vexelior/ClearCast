@@ -12,9 +12,10 @@ namespace WeatherAPI
 {
     public partial class PleaseWaitForm : Form
     {
+
         public PleaseWaitForm()
         {
-            InitializeComponent();
+            InitializeLoadingForm();          
         }
     }
 }
