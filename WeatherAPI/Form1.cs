@@ -10,6 +10,7 @@ using System.Net;
 using System.Windows.Threading;
 using static WeatherAPI.API;
 using System.Linq;
+using System.Drawing;
 
 namespace WeatherAPI
 {
@@ -25,7 +26,7 @@ namespace WeatherAPI
             SearchByLocation();
 
             // Allow enter to be pressed to call the function from the text box. \\
-            cityTextBox.KeyDown += SearchBox_KeyDown;
+            // cityTextBox.KeyDown += SearchBox_KeyDown;
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -92,9 +93,11 @@ namespace WeatherAPI
                     {
                         Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
                     }
-
-                    searchButton.Enabled = true;
-                    searchButton.Cursor = Cursors.Hand;
+                    if (searchButton.Enabled == false && searchButton.Cursor == Cursors.No)
+                    {
+                        searchButton.Enabled = true;
+                        searchButton.Cursor = Cursors.Default;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -160,8 +163,6 @@ namespace WeatherAPI
             string region = "";
             string country = "";
 
-            ShowLoadingMessage();
-
             // Disable the search button. \\
             searchButton.Enabled = false;
             searchButton.Cursor = Cursors.No;
@@ -198,11 +199,14 @@ namespace WeatherAPI
             if (string.IsNullOrEmpty(city))
             {
                 ErrorMessage("Please enter a city.");
+                searchButton.Enabled = true;
+                searchButton.Cursor = Cursors.Default;
             }
             else
             {
                 try
                 {
+                    ShowLoadingMessage();
                     List<string> locationDetails = await LocationDetails(city, region, country);
                     FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
                 }
@@ -473,6 +477,7 @@ namespace WeatherAPI
             if (!string.IsNullOrEmpty(city))
             {
                 using WebClient client = new();
+                List<string> cityList = new();
 
                 try
                 {
@@ -486,9 +491,6 @@ namespace WeatherAPI
                     {
                         string cityName = cityObject["matching_full_name"].ToString();
                         cityListBox.Items.Add(cityName);
-
-                        // Get the total number of cities in the list. \\
-                        List<string> cityList = new();
 
                         foreach (string item in cityListBox.Items)
                         {
@@ -523,17 +525,34 @@ namespace WeatherAPI
                             }
                         };
 
-                        // Get the index of the selected item. \\
-                        int index = cityListBox.SelectedIndex;
-                        // Set the index of the selected item to 0. \\
-                        cityListBox.SelectedIndex = 0;
 
+                        // Create an event handler for selecting an item in the list with the mouse. \\
+                        cityListBox.SelectedIndex = 0;
+                        Console.WriteLine(cityListBox.SelectedIndex);
+                        
                         // Create an event handler for selecting an item in the list with the arrow keys. \\
                         cityListBox.KeyDown += (s, ev) =>
                         {
+                            int index = cityListBox.SelectedIndex;
+                            // Get the indices of the listbox items. \\
+                            for (int i = 0; i < cityList.Count; i++)
+                            {
+                                if ((string)cityListBox.SelectedItem == cityList[i])
+                                {
+                                    index = i;
+                                }
+                            }
+
+                            Console.WriteLine(index);
                             if (ev.KeyCode == Keys.Enter)
                             {
+                                // Clear the city textbox. \\
+                                cityTextBox.Clear();
+
+                                // Set the city textbox text to the selected item in the listbox. \\
                                 cityTextBox.Text = cityListBox.SelectedItem.ToString();
+
+                                // Hide the listbox. \\
                                 cityListBox.Visible = false;
                             }
 
@@ -566,23 +585,23 @@ namespace WeatherAPI
             }
         }
 
-        private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
-        {
-            // Check if the pressed key is the enter key. \\
-            if (e.KeyCode == Keys.Enter)
-            {
-                // If sender is null, return. \\
-                if (sender == null)
-                {
-                    return;
-                }
-                else
-                {
-                    // Otherwise, call the search method. \\
-                    Search(sender, e);
-                }
-            }
-        }
+        // private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
+        // {
+        //     // Check if the pressed key is the enter key. \\
+        //     if (e.KeyCode == Keys.Enter)
+        //     {
+        //         // If sender is null, return. \\
+        //         if (cityTextBox.Focus() == true)
+        //         {
+        //             // Otherwise, call the search method. \\
+        //             Search(sender, e);
+        //         }
+        //         else
+        //         {
+        //             return;
+        //         }
+        //     }
+        // }
 
         private static void ShowLoadingMessage()
         {
@@ -593,6 +612,14 @@ namespace WeatherAPI
             {
                 Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
             }
+
+            // Get the location of the Form1 on the screen. \\
+            Point location = new();
+            location.X = (Screen.PrimaryScreen.WorkingArea.Width - loadingForm.Width) / 2;
+            location.Y = (Screen.PrimaryScreen.WorkingArea.Height - loadingForm.Height) / 2;
+
+            // Set the location of the PleaseWaitForm to the location of Form1. \\
+            loadingForm.Location = location;
 
             // Show the PleaseWaitForm. \\
             loadingForm.Show();
