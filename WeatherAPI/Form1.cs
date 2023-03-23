@@ -25,8 +25,17 @@ namespace WeatherAPI
             InitializeComponent();
             SearchByLocation();
 
-            // Allow enter to be pressed to call the function from the text box. \\
-            // cityTextBox.KeyDown += SearchBox_KeyDown;
+            // Set the position of the form to the center of the screen. \\
+            StartPosition = FormStartPosition.CenterScreen;
+
+            // If the cityListBox is not visible, allow the enter key to search. \\
+            cityTextBox.KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Enter && cityListBox.Visible == false)
+                {
+                    Search(sender, e);
+                }
+            };
         }
 
         private async void FindWeatherDetails(string city, string region, string country)
@@ -389,11 +398,6 @@ namespace WeatherAPI
                 }
             }
 
-            if (string.IsNullOrEmpty(code))
-            {
-                ErrorMessage("Error retrieving country code.");
-            }
-
             return code;
         }
 
@@ -498,6 +502,9 @@ namespace WeatherAPI
                         }
                     }
 
+                    // Write the indices of the list of cities to the console. \\
+
+
                     cityListBox.Visible = true;
 
                     if (cityListBox.Visible == true)
@@ -523,34 +530,41 @@ namespace WeatherAPI
                             {
                                 ev.SuppressKeyPress = true;
                             }
+
+                            if (ev.KeyCode == Keys.Down && cityListBox.SelectedIndex == -1)
+                            {
+                                cityListBox.SelectedIndex = 0;
+                            }
                         };
 
 
-                        // Create an event handler for selecting an item in the list with the mouse. \\
-                        cityListBox.SelectedIndex = 0;
-                        Console.WriteLine(cityListBox.SelectedIndex);
-                        
                         // Create an event handler for selecting an item in the list with the arrow keys. \\
                         cityListBox.KeyDown += (s, ev) =>
                         {
                             int index = cityListBox.SelectedIndex;
-                            // Get the indices of the listbox items. \\
-                            for (int i = 0; i < cityList.Count; i++)
+
+                            if (index == -1)
                             {
-                                if ((string)cityListBox.SelectedItem == cityList[i])
-                                {
-                                    index = i;
-                                }
+                                index = 0;
                             }
 
-                            Console.WriteLine(index);
                             if (ev.KeyCode == Keys.Enter)
                             {
                                 // Clear the city textbox. \\
                                 cityTextBox.Clear();
 
-                                // Set the city textbox text to the selected item in the listbox. \\
-                                cityTextBox.Text = cityListBox.SelectedItem.ToString();
+                                // Get the text from the index of the selected item in the listbox. \\
+                                string? cityText = cityListBox.Items[index].ToString();
+
+                                // Find the matching city in the list of cities. \\
+                                foreach (string item in cityList)
+                                {
+                                    if (item == cityText)
+                                    {
+                                        // Set the city textbox to the selected city. \\
+                                        cityTextBox.Text = item;
+                                    }
+                                }
 
                                 // Hide the listbox. \\
                                 cityListBox.Visible = false;
@@ -570,6 +584,38 @@ namespace WeatherAPI
                         // Mouseleave event to hide the listbox when the user clicks outside of it. \\
                         cityListBox.MouseLeave += (s, ev) =>
                         {
+                            cityListBox.Visible = false;
+                        };
+
+                        // Allow the user to click on an item in the listbox to select it. \\
+                        cityListBox.MouseClick += (s, ev) =>
+                        {
+                            int index = cityListBox.SelectedIndex;
+
+                            if (index == -1)
+                            {
+                                index = 0;
+                                // Set the selected index to the first item in the listbox. \\
+                                cityListBox.SelectedIndex = index;
+                            }
+
+                            // Clear the city textbox. \\
+                            cityTextBox.Clear();
+
+                            // Get the text from the index of the selected item in the listbox. \\
+                            string? cityText = cityListBox.Items[index].ToString();
+
+                            // Find the matching city in the list of cities. \\
+                            foreach (string item in cityList)
+                            {
+                                if (item == cityText)
+                                {
+                                    // Set the city textbox to the selected city. \\
+                                    cityTextBox.Text = item;
+                                }
+                            }
+
+                            // Hide the listbox. \\
                             cityListBox.Visible = false;
                         };
                     }
@@ -613,13 +659,8 @@ namespace WeatherAPI
                 Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
             }
 
-            // Get the location of the Form1 on the screen. \\
-            Point location = new();
-            location.X = (Screen.PrimaryScreen.WorkingArea.Width - loadingForm.Width) / 2;
-            location.Y = (Screen.PrimaryScreen.WorkingArea.Height - loadingForm.Height) / 2;
-
-            // Set the location of the PleaseWaitForm to the location of Form1. \\
-            loadingForm.Location = location;
+            // Place the PleaseWaitForm in the center of the the application. \\
+            loadingForm.StartPosition = FormStartPosition.CenterScreen;
 
             // Show the PleaseWaitForm. \\
             loadingForm.Show();
