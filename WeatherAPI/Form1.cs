@@ -91,9 +91,25 @@ namespace WeatherAPI
                     if (descriptionLabel.Text != null)
                     {
                         string description = descriptionLabel.Text;
+                        string? descriptionIcon = GetWeatherIconCode(description);
+                        string imageUrl = string.Format("https://openweathermap.org/img/w/{0}.png", descriptionIcon);
+                        if (description == "light rain")
+                        {
+                            imageUrl = string.Format("https://openweathermap.org/img/wn/{0}.png", descriptionIcon);
+                        }
                         description = description.Substring(0, 1).ToUpper() + description[1..];
                         description = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(description);
                         descriptionLabel.Text = description;
+                        weatherPictureBox.ImageLocation = imageUrl;
+
+                        // If the image is not the same size as the picture box, resize it. \\
+                        if (weatherPictureBox.Image != null)
+                        {
+                            if (weatherPictureBox.Image.Size != weatherPictureBox.Size)
+                            {
+                                weatherPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                            }
+                        }
                     }
 
                     // If there is an instance of PleaseWaitForm, close it. \\
@@ -669,6 +685,29 @@ namespace WeatherAPI
             {
                 MessageBox.Show("Error creating error message!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        // Write a method to get the weather icon from the API using the description. \\
+        private static string GetWeatherIconCode(string description)
+        {
+            // Make the first letter of each word in the description lowercase. \\
+            description = description.ToLower();
+
+            string icon = description switch
+            {
+                "clear sky" => "01d",
+                "light rain" => "10d@2x",
+                "few clouds" => "02d",
+                "scattered clouds" => "03d",
+                "broken clouds" => "04d",
+                "shower rain" => "09d",
+                "rain" => "10d",
+                "thunderstorm" => "11d",
+                "snow" => "13d",
+                "mist" => "50d",
+                _ => "01d",
+            };
+            return icon;
         }
     }
 }
