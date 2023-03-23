@@ -7,10 +7,8 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net;
-using System.Windows.Threading;
-using static WeatherAPI.API;
 using System.Linq;
-using System.Drawing;
+using static WeatherAPI.API;
 
 namespace WeatherAPI
 {
