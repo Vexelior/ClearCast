@@ -38,6 +38,7 @@ namespace WeatherAPI
             };
         }
 
+
         private async void FindWeatherDetails(string city, string region, string country)
         {
             // Create a list to store the city, region and country. \\
@@ -119,6 +120,7 @@ namespace WeatherAPI
             }
         }
 
+
         private static async Task<List<string>> GetUserLocation()
         {
             List<string> locationInfo = new();
@@ -155,6 +157,7 @@ namespace WeatherAPI
             return locationInfo;
         }
 
+
         private async void SearchByLocation()
         {
             List<string> city = await GetUserLocation();
@@ -165,6 +168,7 @@ namespace WeatherAPI
                 FindWeatherDetails(city[0], city[1], city[2]);
             }
         }
+
 
         private async void Search(object? sender, EventArgs e)
         {
@@ -228,6 +232,7 @@ namespace WeatherAPI
             cityTextBox.Clear();
         }
 
+
         private static async Task<List<string>> LocationDetails(string city, string region, string country)
         {
             List<string> locationDetails = new();
@@ -248,6 +253,7 @@ namespace WeatherAPI
 
             return locationDetails;
         }
+
 
         // Create a method that gets the zip code for the city entered. \\
         private static async Task<string> GetZipCode(string city, string region, string country)
@@ -297,6 +303,7 @@ namespace WeatherAPI
             return zipCode;
         }
 
+
         private static string GetGeoNamesZipCode(string city, string country)
         {
             const string API_KEY = "0f84326655f746d78c9c5c9552756925";
@@ -343,6 +350,7 @@ namespace WeatherAPI
             return zipCode;
         }
 
+
         private static string GetCountryZipCode(string lat, string lng)
         {
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key=0f84326655f746d78c9c5c9552756925&language=en&pretty=1";
@@ -379,6 +387,7 @@ namespace WeatherAPI
             return zipCode;
         }
 
+
         private static string GetCountryCode(string country)
         {
             string code = "";
@@ -400,6 +409,7 @@ namespace WeatherAPI
 
             return code;
         }
+
 
         private static string GetStateCode(string state)
         {
@@ -472,6 +482,7 @@ namespace WeatherAPI
 
             return code;
         }
+
 
         private void CityTextBox_TextChanged(object? sender, EventArgs e)
         {
@@ -631,23 +642,6 @@ namespace WeatherAPI
             }
         }
 
-        // private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
-        // {
-        //     // Check if the pressed key is the enter key. \\
-        //     if (e.KeyCode == Keys.Enter)
-        //     {
-        //         // If sender is null, return. \\
-        //         if (cityTextBox.Focus() == true)
-        //         {
-        //             // Otherwise, call the search method. \\
-        //             Search(sender, e);
-        //         }
-        //         else
-        //         {
-        //             return;
-        //         }
-        //     }
-        // }
 
         private static void ShowLoadingMessage()
         {
@@ -665,6 +659,7 @@ namespace WeatherAPI
             // Show the PleaseWaitForm. \\
             loadingForm.Show();
         }
+
 
         private static void ErrorMessage(string message)
         {
