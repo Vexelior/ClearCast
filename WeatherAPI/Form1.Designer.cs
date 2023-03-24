@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.cityTextBox = new System.Windows.Forms.TextBox();
             this.cityLabel = new System.Windows.Forms.Label();
             this.temperatureLabel = new System.Windows.Forms.Label();
@@ -170,7 +171,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.ClientSize = new System.Drawing.Size(252, 176);
+            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
+            this.ClientSize = new System.Drawing.Size(255, 176);
             this.Controls.Add(this.cityListBox);
             this.Controls.Add(this.weatherPictureBox);
             this.Controls.Add(this.timeLabel);
@@ -184,6 +186,7 @@
             this.Controls.Add(this.temperatureLabel);
             this.Controls.Add(this.cityLabel);
             this.Controls.Add(this.cityTextBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Weather App";
             ((System.ComponentModel.ISupportInitialize)(this.weatherPictureBox)).EndInit();

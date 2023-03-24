@@ -108,10 +108,6 @@ namespace WeatherAPI
                         {
                             weatherPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
                         }
-
-                        // Get the icon from the weatherPictureBox and set the app icon to it. \\
-                        Icon appIcon = GetIconFromPictureBox(weatherPictureBox);
-                        Icon = appIcon;
                     }
 
                     // If there is an instance of PleaseWaitForm, close it. \\
