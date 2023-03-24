@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Linq;
 using static WeatherAPI.API;
+using System.Drawing;
 
 namespace WeatherAPI
 {
@@ -105,11 +106,12 @@ namespace WeatherAPI
                         // If the image is not the same size as the picture box, resize it. \\
                         if (weatherPictureBox.Image != null)
                         {
-                            if (weatherPictureBox.Image.Size != weatherPictureBox.Size)
-                            {
-                                weatherPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
-                            }
+                            weatherPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
                         }
+
+                        // Get the icon from the weatherPictureBox and set the app icon to it. \\
+                        Icon appIcon = GetIconFromPictureBox(weatherPictureBox);
+                        Icon = appIcon;
                     }
 
                     // If there is an instance of PleaseWaitForm, close it. \\
@@ -687,6 +689,7 @@ namespace WeatherAPI
             }
         }
 
+
         // Write a method to get the weather icon from the API using the description. \\
         private static string GetWeatherIconCode(string description)
         {
@@ -707,6 +710,18 @@ namespace WeatherAPI
                 "mist" => "50d",
                 _ => "01d",
             };
+            return icon;
+        }
+
+        // Create a method that gets an icon from a picturebox and returns an icon. \\
+        private static Icon GetIconFromPictureBox(PictureBox pictureBox)
+        {
+            // Create a new bitmap from the picturebox. \\
+            Bitmap bitmap = new(pictureBox.Image);
+
+            // Create a new icon from the bitmap. \\
+            Icon icon = Icon.FromHandle(bitmap.GetHicon());
+
             return icon;
         }
     }
