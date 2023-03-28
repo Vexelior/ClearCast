@@ -27,7 +27,7 @@ namespace WeatherAPI
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeLoadingForm()
+        private void InitializeComponent()
         {
             this.loadingLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -35,7 +35,7 @@ namespace WeatherAPI
             // loadingLabel
             // 
             this.loadingLabel.AutoSize = true;
-            this.loadingLabel.Location = new System.Drawing.Point(150, 50);
+            this.loadingLabel.Location = new System.Drawing.Point(58, 26);
             this.loadingLabel.Name = "loadingLabel";
             this.loadingLabel.Size = new System.Drawing.Size(120, 15);
             this.loadingLabel.TabIndex = 0;
@@ -45,7 +45,7 @@ namespace WeatherAPI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(411, 111);
+            this.ClientSize = new System.Drawing.Size(234, 69);
             this.ControlBox = false;
             this.Controls.Add(this.loadingLabel);
             this.MaximizeBox = false;
