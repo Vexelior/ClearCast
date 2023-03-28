@@ -7,16 +7,14 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net;
-using System.Windows.Threading;
+using System.Linq;
 using static WeatherAPI.API;
+using System.Drawing;
 
 namespace WeatherAPI
 {
     public partial class Form1 : Form
     {
-        // Timer Object. \\
-        private readonly DispatcherTimer timer;
-
         // API Info. \\
         private const string OpenWeatherMapApiKey = "49c8545070487501c919486dbf8afdaf";
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
@@ -26,17 +24,19 @@ namespace WeatherAPI
             InitializeComponent();
             SearchByLocation();
 
-            // Timer logic. \\
-            timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            // Set the position of the form to the center of the screen. \\
+            StartPosition = FormStartPosition.CenterScreen;
 
-            // Allow enter to be pressed to call the function from the text box. \\
-            cityTextBox.KeyDown += SearchBox_KeyDown;
+            // If the cityListBox is not visible, allow the enter key to search. \\
+            cityTextBox.KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Enter && cityListBox.Visible == false)
+                {
+                    Search(sender, e);
+                }
+            };
         }
+
 
         private async void FindWeatherDetails(string city, string region, string country)
         {
@@ -59,13 +59,20 @@ namespace WeatherAPI
                     WeatherInfo? info = JsonConvert.DeserializeObject<WeatherInfo>(json);
 
                     // Display the region and country. \\
-                    if (locationDetails[1] != null && locationDetails[2] != null)
+                    if (locationDetails != null)
                     {
-                        cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}, {locationDetails[2]}";
+                        if (country == "United States" || country == "US")
+                        {
+                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}";
+                        }
+                        else if (country != "United States" || country != "US")
+                        {
+                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[2]}";
+                        }
                     }
                     else
                     {
-                        cityLabel.Text = $"{locationDetails[0]}, null, null";
+                        cityLabel.Text = $"{locationDetails[0]}";
                     }
 
                     temperatureLabel.Text = $"{info?.WeatherDetails?.Temperature}°C";
@@ -85,21 +92,61 @@ namespace WeatherAPI
                     if (descriptionLabel.Text != null)
                     {
                         string description = descriptionLabel.Text;
+                        string? descriptionIcon = GetWeatherIconCode(description);
+                        string imageUrl = string.Format("https://openweathermap.org/img/w/{0}.png", descriptionIcon);
+                        if (description == "light rain")
+                        {
+                            imageUrl = string.Format("https://openweathermap.org/img/wn/{0}.png", descriptionIcon);
+                        }
                         description = description.Substring(0, 1).ToUpper() + description[1..];
                         description = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(description);
                         descriptionLabel.Text = description;
+                        weatherPictureBox.ImageLocation = imageUrl;
+
+                        // If the image is not the same size as the picture box, resize it. \\
+                        if (weatherPictureBox.Image != null)
+                        {
+                            // Resize the image to be 50x50 pixels. \\
+                            weatherPictureBox.Image = new Bitmap(weatherPictureBox.Image, new Size(50, 50));
+
+                            // Center the image in the picture box. \\
+                            weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+
+                            if (weatherPictureBox.Image.Width != weatherPictureBox.Width || weatherPictureBox.Image.Height != weatherPictureBox.Height)
+                            {
+                                weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                            }
+
+                            // If the image is the same size as the picture box, center it. \\
+                            if (weatherPictureBox.Image.Width == weatherPictureBox.Width && weatherPictureBox.Image.Height == weatherPictureBox.Height)
+                            {
+                                weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                            }
+                        }
+                    }
+
+                    // If there is an instance of PleaseWaitForm, close it. \\
+                    if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
+                    {
+                        Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
+                    }
+                    if (searchButton.Enabled == false && searchButton.Cursor == Cursors.No)
+                    {
+                        searchButton.Enabled = true;
+                        searchButton.Cursor = Cursors.Default;
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding weather details!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage("Error retrieving weather information.");
             }
         }
+
 
         private static async Task<List<string>> GetUserLocation()
         {
@@ -126,16 +173,17 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding geolocation!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error finding location details!\n\n{ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Error retrieving location information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage("Error retrieving location information.");
             }
 
             return locationInfo;
         }
+
 
         private async void SearchByLocation()
         {
@@ -146,17 +194,18 @@ namespace WeatherAPI
                 // Find possible region and country for the city entered. \\
                 FindWeatherDetails(city[0], city[1], city[2]);
             }
-            else
-            {
-                MessageBox.Show("Please enter a city.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
+
 
         private async void Search(object? sender, EventArgs e)
         {
             string city = "";
             string region = "";
             string country = "";
+
+            // Disable the search button. \\
+            searchButton.Enabled = false;
+            searchButton.Cursor = Cursors.No;
 
             // If there is a comma in the city name, split the string into city and region. \\
             if (cityTextBox.Text.Contains(","))
@@ -187,18 +236,29 @@ namespace WeatherAPI
                 city = cityTextBox.Text;
             }
 
-            if (!string.IsNullOrEmpty(city))
+            if (string.IsNullOrEmpty(city))
             {
-                List<string> locationDetails = await LocationDetails(city, region, country);
-                FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+                ErrorMessage("Please enter a city.");
+                searchButton.Enabled = true;
+                searchButton.Cursor = Cursors.Default;
             }
             else
             {
-                MessageBox.Show("Please enter a city.", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    ShowLoadingMessage();
+                    List<string> locationDetails = await LocationDetails(city, region, country);
+                    FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
+                }
             }
 
             cityTextBox.Clear();
         }
+
 
         private static async Task<List<string>> LocationDetails(string city, string region, string country)
         {
@@ -211,26 +271,16 @@ namespace WeatherAPI
             builder.Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric";
             HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
 
-            if (response.IsSuccessStatusCode)
+            if (response != null)
             {
-                try
-                {
-                    locationDetails.Add(city);
-                    locationDetails.Add(region);
-                    locationDetails.Add(country);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error retrieving location detials!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                locationDetails.Add(city);
+                locationDetails.Add(region);
+                locationDetails.Add(country);
             }
 
             return locationDetails;
         }
+
 
         // Create a method that gets the zip code for the city entered. \\
         private static async Task<string> GetZipCode(string city, string region, string country)
@@ -249,14 +299,14 @@ namespace WeatherAPI
             // If the country is not US, use the GeoNames API to find the zip code. \\
             if (country != "us")
             {
-                return await GetGeoNamesZipCode(city, region, country);
+                return GetGeoNamesZipCode(city, country);
             }
 
 
             string url = $"https://api.zippopotam.us/{country}/{region}/{city}";
             string? zipCode = "";
             string result = "";
-            
+
             try
             {
                 using HttpClient client = new();
@@ -266,353 +316,128 @@ namespace WeatherAPI
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage("Error retrieving zip code.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!" ,MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage($"Error retrieving zip code!\n\n{ex.Message}");
             }
 
             dynamic? json = JsonConvert.DeserializeObject(result);
             zipCode = json.places[0]["post code"];
 
-            if (string.IsNullOrEmpty(zipCode))
-            {
-                zipCode = "null";
-                MessageBox.Show($"Error finding zipcode!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
             return zipCode;
         }
 
-        private static Task<string> GetGeoNamesZipCode(string city, string region, string country)
+
+        private static string GetGeoNamesZipCode(string city, string country)
         {
-            string countryName = country.ToUpper();
-            countryName = GetCountryCode(countryName);
-            // Get the lat and long for the city entered. \\
-            string latlongUrl = $"http://api.geonames.org/searchJSON?q={city}&country={countryName}&username=vexelior";
-            string? lat = "";
-            string? lng = "";
-            string result = "";
+            const string API_KEY = "0f84326655f746d78c9c5c9552756925";
+            string countryName = GetCountryCode(country.ToUpper());
 
-            try
-            {
-                using HttpClient client = new();
-                UriBuilder builder = new(latlongUrl);
-                HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
-                result = response.Content.ReadAsStringAsync().Result;
+            // Capitalize the first letter of the city. \\
+            city = city[0].ToString().ToUpper() + city[1..];
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            dynamic? json = JsonConvert.DeserializeObject(result);
-            lat = json.geonames[0].lat;
-            lng = json.geonames[0].lng;
-
-            // Get the zip code for the lat and long. \\
-            string url = $"http://api.geonames.org/findNearbyPostalCodesJSON?lat={lat}&lng={lng}&username=vexelior";
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={API_KEY}&language=en&pretty=1";
             string? zipCode = "";
-            string newResult = "";
 
             try
             {
                 using HttpClient client = new();
                 UriBuilder builder = new(url);
                 HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
-                newResult = response.Content.ReadAsStringAsync().Result;
+                string result = response.Content.ReadAsStringAsync().Result;
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Error retrieving weather information.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage("Error finding zipcode.");
+                }
+
+                // Loop through the results and find the zip code. \\
+                foreach (var item in JObject.Parse(result)["results"])
+                {
+                    // If the first item in the JSON array under "components" matches both the city and country, return the zip code. \\
+                    if (item["components"]["city"]?.ToString() == city && item["components"]["country"]?.ToString() == countryName)
+                    {
+                        // Get the longitude and latitude of the city and use the OpenWeatherMap API to find the zip code. \\
+                        string lat = item["geometry"]["lat"].ToString();
+                        string lng = item["geometry"]["lng"].ToString();
+                        zipCode = GetCountryZipCode(lat, lng);
+                        break;
+                    }
+
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error finding zipcode!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorMessage($"Error finding zipcode!\n\n{ex.Message}");
             }
 
-            dynamic? convJson = JsonConvert.DeserializeObject(result);
-            zipCode = convJson.postalCodes[0].postalCode;
-
-            if (string.IsNullOrEmpty(zipCode))
-            {
-                zipCode = "null";
-                MessageBox.Show($"Error finding zipcode!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            return Task.FromResult(zipCode);
+            return zipCode;
         }
+
+
+        private static string GetCountryZipCode(string lat, string lng)
+        {
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key=0f84326655f746d78c9c5c9552756925&language=en&pretty=1";
+            string? zipCode = "";
+
+            try
+            {
+                using HttpClient client = new();
+                UriBuilder builder = new(url);
+                HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
+                string result = response.Content.ReadAsStringAsync().Result;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    ErrorMessage("Error finding zipcode.");
+                }
+
+                // Loop through the results and find the zip code. \\
+                foreach (var item in JObject.Parse(result)["results"])
+                {
+                    // If the first item in the JSON array under "components" matches both the city and country, return the zip code. \\
+                    if (item["components"]["postcode"] != null)
+                    {
+                        zipCode = item["components"]["postcode"].ToString();
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage($"Error finding zipcode!\n\n{ex.Message}");
+            }
+
+            return zipCode;
+        }
+
 
         private static string GetCountryCode(string country)
         {
             string code = "";
+            string url = $"https://restcountries.com/v3.1/name/{country}";
 
-            Dictionary<string, string> countries = new()
-            {
-                { "Afghanistan", "AF" },
-                { "Åland Islands", "AX" },
-                { "Albania", "AL" },
-                { "Algeria", "DZ" },
-                { "American Samoa", "AS" },
-                { "Andorra", "AD" },
-                { "Angola", "AO" },
-                { "Anguilla", "AI" },
-                { "Antarctica", "AQ" },
-                { "Antigua and Barbuda", "AG" },
-                { "Argentina", "AR" },
-                { "Armenia", "AM" },
-                { "Aruba", "AW" },
-                { "Australia", "AU" },
-                { "Austria", "AT" },
-                { "Azerbaijan", "AZ" },
-                { "Bahamas", "BS" },
-                { "Bahrain", "BH" },
-                { "Bangladesh", "BD" },
-                { "Barbados", "BB" },
-                { "Belarus", "BY" },
-                { "Belgium", "BE" },
-                { "Belize", "BZ" },
-                { "Benin", "BJ" },
-                { "Bermuda", "BM" },
-                { "Bhutan", "BT" },
-                { "Bolivia, Plurinational State of", "BO" },
-                { "Bonaire, Sint Eustatius and Saba", "BQ" },
-                { "Bosnia and Herzegovina", "BA" },
-                { "Botswana", "BW" },
-                { "Bouvet Island", "BV" },
-                { "Brazil", "BR" },
-                { "British Indian Ocean Territory", "IO" },
-                { "Brunei Darussalam", "BN" },
-                { "Bulgaria", "BG" },
-                { "Burkina Faso", "BF" },
-                { "Burundi", "BI" },
-                { "Cambodia", "KH" },
-                { "Cameroon", "CM" },
-                { "Canada", "CA" },
-                { "Cape Verde", "CV" },
-                { "Cayman Islands", "KY" },
-                { "Central African Republic", "CF" },
-                { "Chad", "TD" },
-                { "Chile", "CL" },
-                { "China", "CN" },
-                { "Christmas Island", "CX" },
-                { "Cocos (Keeling) Islands", "CC" },
-                { "Colombia", "CO" },
-                { "Comoros", "KM" },
-                { "Congo", "CG" },
-                { "Congo, the Democratic Republic of the", "CD" },
-                { "Cook Islands", "CK" },
-                { "Costa Rica", "CR" },
-                { "Côte d'Ivoire", "CI" },
-                { "Croatia", "HR" },
-                { "Cuba", "CU" },
-                { "Curaçao", "CW" },
-                { "Cyprus", "CY" },
-                { "Czech Republic", "CZ" },
-                { "Denmark", "DK" },
-                { "Djibouti", "DJ" },
-                { "Dominica", "DM" },
-                { "Dominican Republic", "DO" },
-                { "Ecuador", "EC" },
-                { "Greece", "GR" },
-                { "Greenland", "GL" },
-                { "Grenada", "GD" },
-                { "Guadeloupe", "GP" },
-                { "Guam", "GU" },
-                { "Guatemala", "GT" },
-                { "Guernsey", "GG" },
-                { "Guinea", "GN" },
-                { "Guinea-Bissau", "GW" },
-                { "Guyana", "GY" },
-                { "Haiti", "HT" },
-                { "Heard Island and McDonald Islands", "HM" },
-                { "Holy See", "VA" },
-                { "Honduras", "HN" },
-                { "Hong Kong", "HK" },
-                { "Hungary", "HU" },
-                { "Iceland", "IS" },
-                { "India", "IN" },
-                { "Indonesia", "ID" },
-                { "Iran, Islamic Republic of", "IR" },
-                { "Iraq", "IQ" },
-                { "Ireland", "IE" },
-                { "Isle of Man", "IM" },
-                { "Israel", "IL" },
-                { "Italy", "IT" },
-                { "Jamaica", "JM" },
-                { "Japan", "JP" },
-                { "Jersey", "JE" },
-                { "Jordan", "JO" },
-                { "Kazakhstan", "KZ" },
-                { "Kenya", "KE" },
-                { "Kiribati", "KI" },
-                { "Korea, Democratic People's Republic of", "KP" },
-                { "Korea, Republic of", "KR" },
-                { "Kuwait", "KW" },
-                { "Kyrgyzstan", "KG" },
-                { "Lao People's Democratic Republic", "LA" },
-                { "Latvia", "LV" },
-                { "Lebanon", "LB" },
-                { "Lesotho", "LS" },
-                { "Liberia", "LR" },
-                { "Libya", "LY" },
-                { "Liechtenstein", "LI" },
-                { "Lithuania", "LT" },
-                { "Luxembourg", "LU" },
-                { "Macao", "MO" },
-                { "Macedonia, the former Yugoslav Republic of", "MK" },
-                { "Madagascar", "MG" },
-                { "Malawi", "MW" },
-                { "Malaysia", "MY" },
-                { "Maldives", "MV" },
-                { "Mali", "ML" },
-                { "Malta", "MT" },
-                { "Marshall Islands", "MH" },
-                { "Martinique", "MQ" },
-                { "Mauritania", "MR" },
-                { "Mauritius", "MU" },
-                { "Mayotte", "YT" },
-                { "Mexico", "MX" },
-                { "Micronesia, Federated States of", "FM" },
-                { "Moldova, Republic of", "MD" },
-                { "Monaco", "MC" },
-                { "Mongolia", "MN" },
-                { "Montenegro", "ME" },
-                { "Montserrat", "MS" },
-                { "Morocco", "MA" },
-                { "Mozambique", "MZ" },
-                { "Myanmar", "MM" },
-                { "Namibia", "NA" },
-                { "Nauru", "NR" },
-                { "Nepal", "NP" },
-                { "Netherlands", "NL" },
-                { "New Caledonia", "NC" },
-                { "New Zealand", "NZ" },
-                { "Nicaragua", "NI" },
-                { "Niger", "NE" },
-                { "Nigeria", "NG" },
-                { "Niue", "NU" },
-                { "Norfolk Island", "NF" },
-                { "Northern Mariana Islands", "MP" },
-                { "Norway", "NO" },
-                { "Oman", "OM" },
-                { "Pakistan", "PK" },
-                { "Palau", "PW" },
-                { "Palestine, State of", "PS" },
-                { "Panama", "PA" },
-                { "Papua New Guinea", "PG" },
-                { "Paraguay", "PY" },
-                { "Peru", "PE" },
-                { "Philippines", "PH" },
-                { "Pitcairn", "PN" },
-                { "Poland", "PL" },
-                { "Portugal", "PT" },
-                { "Puerto Rico", "PR" },
-                { "Qatar", "QA" },
-                { "Réunion", "RE" },
-                { "Romania", "RO" },
-                { "Russian Federation", "RU" },
-                { "Rwanda", "RW" },
-                { "Saint Barthélemy", "BL" },
-                { "Saint Helena, Ascension and Tristan da Cunha", "SH" },
-                { "Saint Kitts and Nevis", "KN" },
-                { "Saint Lucia", "LC" },
-                { "Saint Martin(French part)", "MF" },
-                { "Saint Pierre and Miquelon", "PM" },
-                { "Saint Vincent and the Grenadines", "VC" },
-                { "Samoa", "WS" },
-                { "San Marino", "SM" },
-                { "Sao Tome and Principe", "ST" },
-                { "Saudi Arabia", "SA" },
-                { "Senegal", "SN" },
-                { "Serbia", "RS" },
-                { "Seychelles", "SC" },
-                { "Sierra Leone", "SL" },
-                { "Singapore", "SG" },
-                { "Sint Maarten(Dutch part)", "SX" },
-                { "Slovakia", "SK" },
-                { "Slovenia", "SI" },
-                { "Solomon Islands", "SB" },
-                { "Somalia", "SO" },
-                { "South Africa", "ZA" },
-                { "South Georgia and the South Sandwich Islands", "GS" },
-                { "South Sudan", "SS" },
-                { "Spain", "ES" },
-                { "Sri Lanka", "LK" },
-                { "Sudan", "SD" },
-                { "Suriname", "SR" },
-                { "Svalbard and Jan Mayen", "SJ" },
-                { "Swaziland", "SZ" },
-                { "Sweden", "SE" },
-                { "Switzerland", "CH" },
-                { "Syrian Arab Republic", "SY" },
-                { "Taiwan, Province of China", "TW" },
-                { "Tajikistan", "TJ" },
-                { "Tanzania, United Republic of", "TZ" },
-                { "Thailand", "TH" },
-                { "Timor-Leste", "TL" },
-                { "Togo", "TG" },
-                { "Tokelau", "TK" },
-                { "Tonga", "TO" },
-                { "Trinidad and Tobago", "TT" },
-                { "Tunisia", "TN" },
-                { "Turkey", "TR" },
-                { "Turkmenistan", "TM" },
-                { "Turks and Caicos Islands", "TC" },
-                { "Tuvalu", "TV" },
-                { "Uganda", "UG" },
-                { "Ukraine", "UA" },
-                { "United Arab Emirates", "AE" },
-                { "United Kingdom", "GB" },
-                { "United States", "US" },
-                { "United States Minor Outlying Islands", "UM" },
-                { "Uruguay", "UY" },
-                { "Uzbekistan", "UZ" },
-                { "Vanuatu", "VU" },
-                { "Venezuela, Bolivarian Republic of", "VE" },
-                { "Viet Nam", "VN" },
-                { "Virgin Islands, British", "VG" },
-                { "Virgin Islands, U.S.", "VI" },
-                { "Wallis and Futuna", "WF" },
-                { "Western Sahara", "EH" },
-                { "Yemen", "YE" },
-                { "Zambia", "ZM" },
-                { "Zimbabwe", "ZW" }
-            };
+            using HttpClient client = new();
+            using HttpResponseMessage response = client.GetAsync(url).Result;
 
-            if (country.Length == 2)
+            if (response.IsSuccessStatusCode)
             {
-                foreach (KeyValuePair<string, string> value in countries)
+                string content = response.Content.ReadAsStringAsync().Result;
+                JArray countryData = JArray.Parse(content);
+
+                if (countryData.Count > 0)
                 {
-                    if (value.Value == country)
-                    {
-                        code = value.Key;
-                    }
-                }
-            }
-            else
-            {
-                foreach (KeyValuePair<string, string> value in countries)
-                {
-                    if (value.Key == country)
-                    {
-                        code = value.Value;
-                    }
+                    code = countryData[0]["cca2"].ToString();
                 }
             }
 
             return code;
         }
 
-        // Create a similar method above to get the state code, United States Only. \\
+
         private static string GetStateCode(string state)
         {
             string code = string.Empty;
@@ -685,6 +510,7 @@ namespace WeatherAPI
             return code;
         }
 
+
         private void CityTextBox_TextChanged(object? sender, EventArgs e)
         {
             string city = cityTextBox.Text;
@@ -693,6 +519,7 @@ namespace WeatherAPI
             if (!string.IsNullOrEmpty(city))
             {
                 using WebClient client = new();
+                List<string> cityList = new();
 
                 try
                 {
@@ -707,26 +534,133 @@ namespace WeatherAPI
                         string cityName = cityObject["matching_full_name"].ToString();
                         cityListBox.Items.Add(cityName);
 
-                        // Get the total number of cities in the list. \\
-                        List<string> cityList = new();
-
                         foreach (string item in cityListBox.Items)
                         {
                             cityList.Add(item);
                         }
                     }
 
+                    // Write the indices of the list of cities to the console. \\
+
+
                     cityListBox.Visible = true;
 
-                    // Mouseleave event to hide the listbox when the user clicks outside of it. \\
-                    cityListBox.MouseLeave += (s, e) =>
+                    if (cityListBox.Visible == true)
                     {
-                        cityListBox.Visible = false;
-                    };
+                        // While the user is typing that is not the up and down arrow keys, focus the textbox, otherwise focus the listbox. \\
+                        cityTextBox.KeyDown += (s, ev) =>
+                        {
+                            if (ev.KeyCode != Keys.Up && ev.KeyCode != Keys.Down)
+                            {
+                                cityTextBox.Focus();
+                            }
+
+                            if (ev.KeyCode == Keys.Up || ev.KeyCode == Keys.Down)
+                            {
+                                cityListBox.Focus();
+                            }
+                        };
+
+                        // Disable the up and down arrow keys from moving the cursor in the city textbox. \\
+                        cityTextBox.KeyDown += (s, ev) =>
+                        {
+                            if (ev.KeyCode == Keys.Up || ev.KeyCode == Keys.Down)
+                            {
+                                ev.SuppressKeyPress = true;
+                            }
+
+                            if (ev.KeyCode == Keys.Down && cityListBox.SelectedIndex == -1)
+                            {
+                                cityListBox.SelectedIndex = 0;
+                            }
+                        };
+
+
+                        // Create an event handler for selecting an item in the list with the arrow keys. \\
+                        cityListBox.KeyDown += (s, ev) =>
+                        {
+                            int index = cityListBox.SelectedIndex;
+
+                            if (index == -1)
+                            {
+                                index = 0;
+                            }
+
+                            if (ev.KeyCode == Keys.Enter)
+                            {
+                                // Clear the city textbox. \\
+                                cityTextBox.Clear();
+
+                                // Get the text from the index of the selected item in the listbox. \\
+                                string? cityText = cityListBox.Items[index].ToString();
+
+                                // Find the matching city in the list of cities. \\
+                                foreach (string item in cityList)
+                                {
+                                    if (item == cityText)
+                                    {
+                                        // Set the city textbox to the selected city. \\
+                                        cityTextBox.Text = item;
+                                    }
+                                }
+
+                                // Hide the listbox. \\
+                                cityListBox.Visible = false;
+                            }
+
+                            if (ev.KeyCode == Keys.Down)
+                            {
+                                index++;
+                            }
+
+                            if (ev.KeyCode == Keys.Up)
+                            {
+                                index--;
+                            }
+                        };
+
+                        // Mouseleave event to hide the listbox when the user clicks outside of it. \\
+                        cityListBox.MouseLeave += (s, ev) =>
+                        {
+                            cityListBox.Visible = false;
+                        };
+
+                        // Allow the user to click on an item in the listbox to select it. \\
+                        cityListBox.MouseClick += (s, ev) =>
+                        {
+                            int index = cityListBox.SelectedIndex;
+
+                            if (index == -1)
+                            {
+                                index = 0;
+                                // Set the selected index to the first item in the listbox. \\
+                                cityListBox.SelectedIndex = index;
+                            }
+
+                            // Clear the city textbox. \\
+                            cityTextBox.Clear();
+
+                            // Get the text from the index of the selected item in the listbox. \\
+                            string? cityText = cityListBox.Items[index].ToString();
+
+                            // Find the matching city in the list of cities. \\
+                            foreach (string item in cityList)
+                            {
+                                if (item == cityText)
+                                {
+                                    // Set the city textbox to the selected city. \\
+                                    cityTextBox.Text = item;
+                                }
+                            }
+
+                            // Hide the listbox. \\
+                            cityListBox.Visible = false;
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error finding cities!\n\n{ex.Message}", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorMessage($"Error retrieving cities!\n\n{ex.Message}");
                 }
             }
             else
@@ -735,33 +669,85 @@ namespace WeatherAPI
             }
         }
 
-        private void CityListBox_SelectedIndexChanged(object? sender, EventArgs e)
+
+        private static void ShowLoadingMessage()
         {
-            cityTextBox.Text = cityListBox.SelectedItem.ToString();
-            cityListBox.Visible = false;
+            PleaseWaitForm loadingForm = new();
+
+            // If there is more than one instance of PleaseWaitForm, close it. \\
+            if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
+            {
+                Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
+            }
+
+            // Place the PleaseWaitForm in the center of the the application. \\
+            loadingForm.StartPosition = FormStartPosition.CenterScreen;
+
+            // Show the PleaseWaitForm. \\
+            loadingForm.Show();
         }
 
-        private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
+
+        private static void ErrorMessage(string message)
         {
-            // Check if the pressed key is the enter key. \\
-            if (e.KeyCode == Keys.Enter)
+            if (!string.IsNullOrEmpty(message))
             {
-                // If sender is null, return. \\
-                if (sender == null)
-                {
-                    return;
-                }
-                else
-                {
-                    // Otherwise, call the search method. \\
-                    Search(sender, e);
-                }
+                MessageBox.Show(message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                MessageBox.Show("Error creating error message!", "Oops!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        private void Timer_Tick(object? sender, EventArgs e)
+        // Write a method to get the weather icon from the API using the description. \\
+        private static string GetWeatherIconCode(string description)
         {
-            timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt") + " " + DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+            string weatherCode = string.Empty;
+
+            weatherCode = description.ToLower() switch
+            {
+                "clear sky" => "01d",
+                "few clouds" => "02d",
+                "scattered clouds" => "03d",
+                "broken clouds" => "04d",
+                "shower rain" => "09d",
+                "rain" => "10d",
+                "thunderstorm" => "11d",
+                "snow" => "13d",
+                "mist" => "50d",
+                "smoke" => "50d",
+                "haze" => "50d",
+                "sand" => "50d",
+                "dust" => "50d",
+                "fog" => "50d",
+                "sand/ dust whirls" => "50d",
+                "volcanic ash" => "50d",
+                "squalls" => "50d",
+                "tornado" => "50d",
+                "light rain" => "10d",
+                "moderate rain" => "10d",
+                "heavy intensity rain" => "10d",
+                "very heavy rain" => "10d",
+                "extreme rain" => "10d",
+                "freezing rain" => "13d@2x",
+                "light intensity shower rain" => "09d@2x",
+                "heavy intensity shower rain" => "09d@2x",
+                "ragged shower rain" => "09d@2x",
+                "light snow" => "13d@2x",
+                "heavy snow" => "13d@2x",
+                "sleet" => "13d@2x",
+                "shower sleet" => "13d@2x",
+                "light rain and snow" => "13d@2x",
+                "rain and snow" => "13d@2x",
+                "light shower snow" => "13d@2x",
+                "shower snow" => "13d@2x",
+                "heavy shower snow" => "13d@2x",
+                "overcast clouds" => "04d@2x",
+                _ => "01d",
+            };
+
+            return weatherCode;
+            }
         }
     }
-}
