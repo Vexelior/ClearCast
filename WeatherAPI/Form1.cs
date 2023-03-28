@@ -10,14 +10,16 @@ using System.Net;
 using System.Linq;
 using static WeatherAPI.API;
 using System.Drawing;
+using System.Configuration;
 
 namespace WeatherAPI
 {
     public partial class Form1 : Form
     {
         // API Info. \\
-        private const string OpenWeatherMapApiKey = "49c8545070487501c919486dbf8afdaf";
+        static readonly string? OpenWeatherMapApiKey = ConfigurationManager.AppSettings["OpenWeatherKey"];
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
+        static readonly string? OpenCageKey = ConfigurationManager.AppSettings["OpenCageKey"];
 
         public Form1()
         {
@@ -333,13 +335,12 @@ namespace WeatherAPI
 
         private static string GetGeoNamesZipCode(string city, string country)
         {
-            const string API_KEY = "0f84326655f746d78c9c5c9552756925";
             string countryName = GetCountryCode(country.ToUpper());
 
             // Capitalize the first letter of the city. \\
             city = city[0].ToString().ToUpper() + city[1..];
 
-            string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={API_KEY}&language=en&pretty=1";
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={OpenCageKey}&language=en&pretty=1";
             string? zipCode = "";
 
             try
@@ -380,7 +381,7 @@ namespace WeatherAPI
 
         private static string GetCountryZipCode(string lat, string lng)
         {
-            string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key=0f84326655f746d78c9c5c9552756925&language=en&pretty=1";
+            string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key={OpenCageKey}&language=en&pretty=1";
             string? zipCode = "";
 
             try
@@ -730,20 +731,20 @@ namespace WeatherAPI
                 "heavy intensity rain" => "10d",
                 "very heavy rain" => "10d",
                 "extreme rain" => "10d",
-                "freezing rain" => "13d@2x",
-                "light intensity shower rain" => "09d@2x",
-                "heavy intensity shower rain" => "09d@2x",
-                "ragged shower rain" => "09d@2x",
-                "light snow" => "13d@2x",
-                "heavy snow" => "13d@2x",
-                "sleet" => "13d@2x",
-                "shower sleet" => "13d@2x",
-                "light rain and snow" => "13d@2x",
-                "rain and snow" => "13d@2x",
-                "light shower snow" => "13d@2x",
-                "shower snow" => "13d@2x",
-                "heavy shower snow" => "13d@2x",
-                "overcast clouds" => "04d@2x",
+                "freezing rain" => "13d",
+                "light intensity shower rain" => "09d",
+                "heavy intensity shower rain" => "09d",
+                "ragged shower rain" => "09d",
+                "light snow" => "13d",
+                "heavy snow" => "13d",
+                "sleet" => "13d",
+                "shower sleet" => "13d",
+                "light rain and snow" => "13d",
+                "rain and snow" => "13d",
+                "light shower snow" => "13d",
+                "shower snow" => "13d",
+                "heavy shower snow" => "13d",
+                "overcast clouds" => "04d",
                 _ => "01d",
             };
 
