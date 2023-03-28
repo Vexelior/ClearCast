@@ -15,7 +15,7 @@ namespace WeatherAPI
 
         public PleaseWaitForm()
         {
-            InitializeLoadingForm();          
+            InitializeComponent();          
         }
     }
 }

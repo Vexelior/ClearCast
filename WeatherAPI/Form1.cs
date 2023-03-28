@@ -106,7 +106,22 @@ namespace WeatherAPI
                         // If the image is not the same size as the picture box, resize it. \\
                         if (weatherPictureBox.Image != null)
                         {
-                            weatherPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                            // Resize the image to be 50x50 pixels. \\
+                            weatherPictureBox.Image = new Bitmap(weatherPictureBox.Image, new Size(50, 50));
+
+                            // Center the image in the picture box. \\
+                            weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+
+                            if (weatherPictureBox.Image.Width != weatherPictureBox.Width || weatherPictureBox.Image.Height != weatherPictureBox.Height)
+                            {
+                                weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                            }
+
+                            // If the image is the same size as the picture box, center it. \\
+                            if (weatherPictureBox.Image.Width == weatherPictureBox.Width && weatherPictureBox.Image.Height == weatherPictureBox.Height)
+                            {
+                                weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                            }
                         }
                     }
 
@@ -685,17 +700,14 @@ namespace WeatherAPI
             }
         }
 
-
         // Write a method to get the weather icon from the API using the description. \\
         private static string GetWeatherIconCode(string description)
         {
-            // Make the first letter of each word in the description lowercase. \\
-            description = description.ToLower();
+            string weatherCode = string.Empty;
 
-            string icon = description switch
+            weatherCode = description.ToLower() switch
             {
                 "clear sky" => "01d",
-                "light rain" => "10d@2x",
                 "few clouds" => "02d",
                 "scattered clouds" => "03d",
                 "broken clouds" => "04d",
@@ -704,21 +716,38 @@ namespace WeatherAPI
                 "thunderstorm" => "11d",
                 "snow" => "13d",
                 "mist" => "50d",
+                "smoke" => "50d",
+                "haze" => "50d",
+                "sand" => "50d",
+                "dust" => "50d",
+                "fog" => "50d",
+                "sand/ dust whirls" => "50d",
+                "volcanic ash" => "50d",
+                "squalls" => "50d",
+                "tornado" => "50d",
+                "light rain" => "10d",
+                "moderate rain" => "10d",
+                "heavy intensity rain" => "10d",
+                "very heavy rain" => "10d",
+                "extreme rain" => "10d",
+                "freezing rain" => "13d@2x",
+                "light intensity shower rain" => "09d@2x",
+                "heavy intensity shower rain" => "09d@2x",
+                "ragged shower rain" => "09d@2x",
+                "light snow" => "13d@2x",
+                "heavy snow" => "13d@2x",
+                "sleet" => "13d@2x",
+                "shower sleet" => "13d@2x",
+                "light rain and snow" => "13d@2x",
+                "rain and snow" => "13d@2x",
+                "light shower snow" => "13d@2x",
+                "shower snow" => "13d@2x",
+                "heavy shower snow" => "13d@2x",
+                "overcast clouds" => "04d@2x",
                 _ => "01d",
             };
-            return icon;
-        }
 
-        // Create a method that gets an icon from a picturebox and returns an icon. \\
-        private static Icon GetIconFromPictureBox(PictureBox pictureBox)
-        {
-            // Create a new bitmap from the picturebox. \\
-            Bitmap bitmap = new(pictureBox.Image);
-
-            // Create a new icon from the bitmap. \\
-            Icon icon = Icon.FromHandle(bitmap.GetHicon());
-
-            return icon;
+            return weatherCode;
+            }
         }
     }
-}
