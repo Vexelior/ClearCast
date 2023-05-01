@@ -17,9 +17,9 @@ namespace WeatherAPI
     public partial class Form1 : Form
     {
         // API Info. \\
-        static readonly string? OpenWeatherMapApiKey = ConfigurationManager.AppSettings["OpenWeatherKey"];
+        static readonly string OpenWeatherMapApiKey = ConfigurationManager.AppSettings["OpenWeatherKey"];
         private const string OpenWeatherMapApiUrl = "https://api.openweathermap.org/data/2.5/weather";
-        static readonly string? OpenCageKey = ConfigurationManager.AppSettings["OpenCageKey"];
+        static readonly string OpenCageKey = ConfigurationManager.AppSettings["OpenCageKey"];
 
         public Form1()
         {
@@ -43,10 +43,12 @@ namespace WeatherAPI
         private async void FindWeatherDetails(string city, string region, string country)
         {
             // Create a list to store the city, region and country. \\
-            List<string> locationDetails = new();
-            locationDetails.Add(city);
-            locationDetails.Add(region);
-            locationDetails.Add(country);
+            List<string> locationDetails = new()
+            {
+                city,
+                region,
+                country
+            };
 
             using HttpClient client = new();
             UriBuilder builder = new(OpenWeatherMapApiUrl);
@@ -58,7 +60,7 @@ namespace WeatherAPI
                 try
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    WeatherInfo? info = JsonConvert.DeserializeObject<WeatherInfo>(json);
+                    WeatherInfo info = JsonConvert.DeserializeObject<WeatherInfo>(json);
 
                     // Display the region and country. \\
                     if (locationDetails != null)
@@ -94,7 +96,7 @@ namespace WeatherAPI
                     if (descriptionLabel.Text != null)
                     {
                         string description = descriptionLabel.Text;
-                        string? descriptionIcon = GetWeatherIconCode(description);
+                        string descriptionIcon = GetWeatherIconCode(description);
                         string imageUrl = string.Format("https://openweathermap.org/img/w/{0}.png", descriptionIcon);
                         if (description == "light rain")
                         {
@@ -162,7 +164,7 @@ namespace WeatherAPI
                 try
                 {
                     string json = await response.Content.ReadAsStringAsync();
-                    LocationInfo? info = JsonConvert.DeserializeObject<LocationInfo>(json);
+                    LocationInfo info = JsonConvert.DeserializeObject<LocationInfo>(json);
                     // Search through the json file to find the city. \\
                     JObject jsonQuery = JObject.Parse(json);
                     string city = jsonQuery["city"].ToString();
@@ -199,7 +201,7 @@ namespace WeatherAPI
         }
 
 
-        private async void Search(object? sender, EventArgs e)
+        private async void Search(object sender, EventArgs e)
         {
             string city = "";
             string region = "";
@@ -306,7 +308,7 @@ namespace WeatherAPI
 
 
             string url = $"https://api.zippopotam.us/{country}/{region}/{city}";
-            string? zipCode = "";
+            string zipCode = "";
             string result = "";
 
             try
@@ -326,7 +328,7 @@ namespace WeatherAPI
                 ErrorMessage($"Error retrieving zip code!\n\n{ex.Message}");
             }
 
-            dynamic? json = JsonConvert.DeserializeObject(result);
+            dynamic json = JsonConvert.DeserializeObject(result);
             zipCode = json.places[0]["post code"];
 
             return zipCode;
@@ -341,7 +343,7 @@ namespace WeatherAPI
             city = city[0].ToString().ToUpper() + city[1..];
 
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={OpenCageKey}&language=en&pretty=1";
-            string? zipCode = "";
+            string zipCode = "";
 
             try
             {
@@ -382,7 +384,7 @@ namespace WeatherAPI
         private static string GetCountryZipCode(string lat, string lng)
         {
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key={OpenCageKey}&language=en&pretty=1";
-            string? zipCode = "";
+            string zipCode = "";
 
             try
             {
@@ -512,32 +514,34 @@ namespace WeatherAPI
         }
 
 
-        private void CityTextBox_TextChanged(object? sender, EventArgs e)
+        private void CityTextBox_TextChanged(object sender, EventArgs e)
         {
             string city = cityTextBox.Text;
 
             // Call an API to retrieve a list of cities that match the user's input. \\
             if (!string.IsNullOrEmpty(city))
             {
-                using WebClient client = new();
                 List<string> cityList = new();
 
                 try
                 {
-                    string json = client.DownloadString($"https://api.teleport.org/api/cities/?search={city}");
-                    JObject jsonQuery = JObject.Parse(json);
-                    JArray? cities = jsonQuery["_embedded"]["city:search-results"] as JArray;
-
-                    // Display the list of cities in a listbox. \\
-                    cityListBox.Items.Clear();
-                    foreach (JObject cityObject in cities)
+                    using (HttpClient webClient = new())
                     {
-                        string cityName = cityObject["matching_full_name"].ToString();
-                        cityListBox.Items.Add(cityName);
+                        string json = webClient.GetStringAsync($"https://api.teleport.org/api/cities/?search={city}").Result;
+                        JObject jsonQuery = JObject.Parse(json);
+                        JArray cities = jsonQuery["_embedded"]["city:search-results"] as JArray;
 
-                        foreach (string item in cityListBox.Items)
+                        // Display the list of cities in a listbox. \\
+                        cityListBox.Items.Clear();
+                        foreach (JObject cityObject in cities.Cast<JObject>())
                         {
-                            cityList.Add(item);
+                            string cityName = cityObject["matching_full_name"].ToString();
+                            cityListBox.Items.Add(cityName);
+
+                            foreach (string item in cityListBox.Items)
+                            {
+                                cityList.Add(item);
+                            }
                         }
                     }
 
@@ -593,7 +597,7 @@ namespace WeatherAPI
                                 cityTextBox.Clear();
 
                                 // Get the text from the index of the selected item in the listbox. \\
-                                string? cityText = cityListBox.Items[index].ToString();
+                                string cityText = cityListBox.Items[index].ToString();
 
                                 // Find the matching city in the list of cities. \\
                                 foreach (string item in cityList)
@@ -642,7 +646,7 @@ namespace WeatherAPI
                             cityTextBox.Clear();
 
                             // Get the text from the index of the selected item in the listbox. \\
-                            string? cityText = cityListBox.Items[index].ToString();
+                            string cityText = cityListBox.Items[index].ToString();
 
                             // Find the matching city in the list of cities. \\
                             foreach (string item in cityList)
