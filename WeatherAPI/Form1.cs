@@ -11,6 +11,7 @@ using System.Linq;
 using static WeatherAPI.API;
 using System.Drawing;
 using System.Configuration;
+using System.IO;
 
 namespace WeatherAPI
 {
@@ -42,112 +43,78 @@ namespace WeatherAPI
 
         private async void FindWeatherDetails(string city, string region, string country)
         {
-            // Create a list to store the city, region and country. \\
-            List<string> locationDetails = new()
-            {
-                city,
-                region,
-                country
-            };
-
             using HttpClient client = new();
             UriBuilder builder = new(OpenWeatherMapApiUrl);
             builder.Query = $"q={city},{region},{country}&appid={OpenWeatherMapApiKey}&units=metric";
-            HttpResponseMessage response = await client.GetAsync(builder.ToString());
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                try
+                string json = await client.GetStringAsync(builder.ToString());
+                WeatherInfo info = JsonConvert.DeserializeObject<WeatherInfo>(json);
+
+                // Display the region and country.
+                string locationLabel;
+                if (country == "United States" || country == "US")
                 {
-                    string json = await response.Content.ReadAsStringAsync();
-                    WeatherInfo info = JsonConvert.DeserializeObject<WeatherInfo>(json);
+                    locationLabel = $"{city}, {region}";
+                }
+                else
+                {
+                    locationLabel = $"{city}, {country}";
+                }
+                cityLabel.Text = locationLabel;
 
-                    // Display the region and country. \\
-                    if (locationDetails != null)
+                // Display the weather information.
+                temperatureLabel.Text = $"{(info?.WeatherDetails?.Temperature * 9 / 5 + 32):F1}°F";
+                descriptionLabel.Text = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(info?.Weather?[0].Description ?? "");
+                humidityLabel.Text = $"{info?.WeatherDetails?.Humidity}%";
+
+                // Display the weather icon.
+                string descriptionIcon = GetWeatherIconCode(descriptionLabel.Text);
+                string iconUrl = $"http://openweathermap.org/img/w/{descriptionIcon}.png";
+
+                // Save the icon to the assets/icons folder in the working directory using Parent. \\
+                string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName + "\\assets\\icons\\" + descriptionIcon + ".png";
+                if (!File.Exists(path))
+                {
+                    using HttpClient client2 = new();
+                    using HttpResponseMessage response = client2.GetAsync(iconUrl).Result;
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (country == "United States" || country == "US")
-                        {
-                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[1]}";
-                        }
-                        else if (country != "United States" || country != "US")
-                        {
-                            cityLabel.Text = $"{locationDetails[0]}, {locationDetails[2]}";
-                        }
-                    }
-                    else
-                    {
-                        cityLabel.Text = $"{locationDetails[0]}";
-                    }
-
-                    temperatureLabel.Text = $"{info?.WeatherDetails?.Temperature}°C";
-                    descriptionLabel.Text = info?.Weather?[0].Description;
-                    humidityLabel.Text = $"{info?.WeatherDetails?.Humidity}%";
-
-                    // Celcius to Fahrenheit conversion. \\
-                    if (temperatureLabel.Text != null)
-                    {
-                        double temp = Convert.ToDouble(temperatureLabel.Text[0..^2]);
-                        double fahrenheit = (temp * 9 / 5) + 32;
-                        fahrenheit = Math.Round(fahrenheit, 1);
-                        temperatureLabel.Text = $"{fahrenheit}°F";
-                    }
-
-                    // Make the first character of the description uppercase, and new words start with uppercase after a space. \\
-                    if (descriptionLabel.Text != null)
-                    {
-                        string description = descriptionLabel.Text;
-                        string descriptionIcon = GetWeatherIconCode(description);
-                        string imageUrl = string.Format("https://openweathermap.org/img/w/{0}.png", descriptionIcon);
-                        if (description == "light rain")
-                        {
-                            imageUrl = string.Format("https://openweathermap.org/img/wn/{0}.png", descriptionIcon);
-                        }
-                        description = description.Substring(0, 1).ToUpper() + description[1..];
-                        description = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(description);
-                        descriptionLabel.Text = description;
-                        weatherPictureBox.ImageLocation = imageUrl;
-
-                        // If the image is not the same size as the picture box, resize it. \\
-                        if (weatherPictureBox.Image != null)
-                        {
-                            // Resize the image to be 50x50 pixels. \\
-                            weatherPictureBox.Image = new Bitmap(weatherPictureBox.Image, new Size(50, 50));
-
-                            // Center the image in the picture box. \\
-                            weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-
-                            if (weatherPictureBox.Image.Width != weatherPictureBox.Width || weatherPictureBox.Image.Height != weatherPictureBox.Height)
-                            {
-                                weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                            }
-
-                            // If the image is the same size as the picture box, center it. \\
-                            if (weatherPictureBox.Image.Width == weatherPictureBox.Width && weatherPictureBox.Image.Height == weatherPictureBox.Height)
-                            {
-                                weatherPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                            }
-                        }
-                    }
-
-                    // If there is an instance of PleaseWaitForm, close it. \\
-                    if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
-                    {
-                        Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
-                    }
-                    if (searchButton.Enabled == false && searchButton.Cursor == Cursors.No)
-                    {
-                        searchButton.Enabled = true;
-                        searchButton.Cursor = Cursors.Default;
+                        using Stream stream = await response.Content.ReadAsStreamAsync();
+                        using FileStream fileStream = new(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+                        await stream.CopyToAsync(fileStream);
                     }
                 }
-                catch (Exception ex)
+
+                // If the file path exists, display the icon from the file path. \\
+                if (File.Exists(path))
                 {
-                    ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
+                    weatherPictureBox.ImageLocation = path;
                 }
+                else
+                {
+                    weatherPictureBox.ImageLocation = iconUrl;
+                }
+
+                weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+
+                // Close the PleaseWaitForm if it is open.
+                if (Application.OpenForms.OfType<PleaseWaitForm>().Count() != 0)
+                {
+                    Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
+                }
+
+                // Enable the search button. \\
+                searchButton.Enabled = true;
+                searchButton.Cursor = Cursors.Default;
+
+                // Clear the cityListBox. \\
+                cityListBox.Items.Clear();
+                cityListBox.Visible = false;
             }
-            else
+            catch (Exception ex)
             {
-                ErrorMessage("Error retrieving weather information.");
+                ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
             }
         }
 
@@ -709,8 +676,10 @@ namespace WeatherAPI
         private static string GetWeatherIconCode(string description)
         {
             string weatherCode = string.Empty;
+            description = description.ToLower();
 
-            weatherCode = description.ToLower() switch
+            // Switch statement to find the weather icon code. \\
+            weatherCode = description switch
             {
                 "clear sky" => "01d",
                 "few clouds" => "02d",
@@ -721,16 +690,25 @@ namespace WeatherAPI
                 "thunderstorm" => "11d",
                 "snow" => "13d",
                 "mist" => "50d",
-                "smoke" => "50d",
-                "haze" => "50d",
-                "sand" => "50d",
-                "dust" => "50d",
-                "fog" => "50d",
-                "sand/ dust whirls" => "50d",
-                "volcanic ash" => "50d",
-                "squalls" => "50d",
-                "tornado" => "50d",
                 "light rain" => "10d",
+                "thunderstorm with light rain" => "11d",
+                "thunderstorm with rain" => "11d",
+                "thunderstorm with heavy rain" => "11d",
+                "light thunderstorm" => "11d",
+                "heavy thunderstorm" => "11d",
+                "ragged thunderstorm" => "11d",
+                "thunderstorm with light drizzle" => "11d",
+                "thunderstorm with drizzle" => "11d",
+                "thunderstorm with heavy drizzle" => "11d",
+                "light intensity drizzle" => "09d",
+                "drizzle" => "09d",
+                "heavy intensity drizzle" => "09d",
+                "light intensity drizzle rain" => "09d",
+                "drizzle rain" => "09d",
+                "heavy intensity drizzle rain" => "09d",
+                "shower rain and drizzle" => "09d",
+                "heavy shower rain and drizzle" => "09d",
+                "shower drizzle" => "09d",
                 "moderate rain" => "10d",
                 "heavy intensity rain" => "10d",
                 "very heavy rain" => "10d",
@@ -743,16 +721,29 @@ namespace WeatherAPI
                 "heavy snow" => "13d",
                 "sleet" => "13d",
                 "shower sleet" => "13d",
+                "light shower sleet" => "13d",
                 "light rain and snow" => "13d",
                 "rain and snow" => "13d",
                 "light shower snow" => "13d",
                 "shower snow" => "13d",
                 "heavy shower snow" => "13d",
-                "overcast clouds" => "04d",
+                "smoke" => "50d",
+                "haze" => "50d",
+                "sand/dust whirls" => "50d",
+                "fog" => "50d",
+                "sand" => "50d",
+                "dust" => "50d",
+                "volcanic ash" => "50d",
+                "squalls" => "50d",
+                "tornado" => "50d",
+                "few clouds: 11-25%" => "02d",
+                "scattered clouds: 25-50%" => "03d",
+                "broken clouds: 51-84%" => "04d",
+                "overcast clouds: 85-100%" => "04d",
                 _ => "01d",
             };
 
             return weatherCode;
-            }
         }
     }
+}

@@ -28,190 +28,189 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.cityTextBox = new System.Windows.Forms.TextBox();
-            this.cityLabel = new System.Windows.Forms.Label();
-            this.temperatureLabel = new System.Windows.Forms.Label();
-            this.descriptionLabel = new System.Windows.Forms.Label();
-            this.humidityLabel = new System.Windows.Forms.Label();
-            this.searchButton = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.cityListBox = new System.Windows.Forms.ListBox();
-            this.timeLabel = new System.Windows.Forms.Label();
-            this.weatherPictureBox = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.weatherPictureBox)).BeginInit();
-            this.SuspendLayout();
+            cityTextBox = new System.Windows.Forms.TextBox();
+            cityLabel = new System.Windows.Forms.Label();
+            temperatureLabel = new System.Windows.Forms.Label();
+            descriptionLabel = new System.Windows.Forms.Label();
+            humidityLabel = new System.Windows.Forms.Label();
+            searchButton = new System.Windows.Forms.Button();
+            label1 = new System.Windows.Forms.Label();
+            label2 = new System.Windows.Forms.Label();
+            label3 = new System.Windows.Forms.Label();
+            label4 = new System.Windows.Forms.Label();
+            cityListBox = new System.Windows.Forms.ListBox();
+            timeLabel = new System.Windows.Forms.Label();
+            weatherPictureBox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)weatherPictureBox).BeginInit();
+            SuspendLayout();
             // 
             // cityTextBox
             // 
-            this.cityTextBox.Location = new System.Drawing.Point(12, 12);
-            this.cityTextBox.Name = "cityTextBox";
-            this.cityTextBox.Size = new System.Drawing.Size(332, 23);
-            this.cityTextBox.TabIndex = 0;
-            this.cityTextBox.TextChanged += new System.EventHandler(this.CityTextBox_TextChanged);
+            cityTextBox.Location = new System.Drawing.Point(12, 12);
+            cityTextBox.Name = "cityTextBox";
+            cityTextBox.Size = new System.Drawing.Size(332, 23);
+            cityTextBox.TabIndex = 0;
+            cityTextBox.TextChanged += CityTextBox_TextChanged;
             // 
             // cityLabel
             // 
-            this.cityLabel.AutoSize = true;
-            this.cityLabel.BackColor = System.Drawing.Color.Transparent;
-            this.cityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.cityLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.cityLabel.Location = new System.Drawing.Point(55, 102);
-            this.cityLabel.Name = "cityLabel";
-            this.cityLabel.Size = new System.Drawing.Size(0, 20);
-            this.cityLabel.TabIndex = 1;
+            cityLabel.AutoSize = true;
+            cityLabel.BackColor = System.Drawing.Color.Transparent;
+            cityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            cityLabel.ForeColor = System.Drawing.SystemColors.Control;
+            cityLabel.Location = new System.Drawing.Point(55, 102);
+            cityLabel.Name = "cityLabel";
+            cityLabel.Size = new System.Drawing.Size(0, 20);
+            cityLabel.TabIndex = 1;
             // 
             // temperatureLabel
             // 
-            this.temperatureLabel.AutoSize = true;
-            this.temperatureLabel.BackColor = System.Drawing.Color.Transparent;
-            this.temperatureLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.temperatureLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.temperatureLabel.Location = new System.Drawing.Point(114, 126);
-            this.temperatureLabel.Name = "temperatureLabel";
-            this.temperatureLabel.Size = new System.Drawing.Size(0, 20);
-            this.temperatureLabel.TabIndex = 2;
+            temperatureLabel.AutoSize = true;
+            temperatureLabel.BackColor = System.Drawing.Color.Transparent;
+            temperatureLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            temperatureLabel.ForeColor = System.Drawing.SystemColors.Control;
+            temperatureLabel.Location = new System.Drawing.Point(114, 126);
+            temperatureLabel.Name = "temperatureLabel";
+            temperatureLabel.Size = new System.Drawing.Size(0, 20);
+            temperatureLabel.TabIndex = 2;
             // 
             // descriptionLabel
             // 
-            this.descriptionLabel.AutoSize = true;
-            this.descriptionLabel.BackColor = System.Drawing.Color.Transparent;
-            this.descriptionLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.descriptionLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.descriptionLabel.Location = new System.Drawing.Point(106, 151);
-            this.descriptionLabel.Name = "descriptionLabel";
-            this.descriptionLabel.Size = new System.Drawing.Size(0, 20);
-            this.descriptionLabel.TabIndex = 3;
+            descriptionLabel.AutoSize = true;
+            descriptionLabel.BackColor = System.Drawing.Color.Transparent;
+            descriptionLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            descriptionLabel.ForeColor = System.Drawing.SystemColors.Control;
+            descriptionLabel.Location = new System.Drawing.Point(106, 151);
+            descriptionLabel.Name = "descriptionLabel";
+            descriptionLabel.Size = new System.Drawing.Size(0, 20);
+            descriptionLabel.TabIndex = 3;
             // 
             // humidityLabel
             // 
-            this.humidityLabel.AutoSize = true;
-            this.humidityLabel.BackColor = System.Drawing.Color.Transparent;
-            this.humidityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.humidityLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.humidityLabel.Location = new System.Drawing.Point(91, 175);
-            this.humidityLabel.Name = "humidityLabel";
-            this.humidityLabel.Size = new System.Drawing.Size(0, 20);
-            this.humidityLabel.TabIndex = 4;
+            humidityLabel.AutoSize = true;
+            humidityLabel.BackColor = System.Drawing.Color.Transparent;
+            humidityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            humidityLabel.ForeColor = System.Drawing.SystemColors.Control;
+            humidityLabel.Location = new System.Drawing.Point(91, 175);
+            humidityLabel.Name = "humidityLabel";
+            humidityLabel.Size = new System.Drawing.Size(0, 20);
+            humidityLabel.TabIndex = 4;
             // 
             // searchButton
             // 
-            this.searchButton.Location = new System.Drawing.Point(138, 41);
-            this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(75, 23);
-            this.searchButton.TabIndex = 6;
-            this.searchButton.Text = "Search";
-            this.searchButton.UseVisualStyleBackColor = true;
-            this.searchButton.Click += new System.EventHandler(this.Search);
+            searchButton.Location = new System.Drawing.Point(138, 41);
+            searchButton.Name = "searchButton";
+            searchButton.Size = new System.Drawing.Size(75, 23);
+            searchButton.TabIndex = 6;
+            searchButton.Text = "Search";
+            searchButton.UseVisualStyleBackColor = true;
+            searchButton.Click += Search;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.ForeColor = System.Drawing.SystemColors.Control;
-            this.label1.Location = new System.Drawing.Point(12, 102);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(37, 20);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "City:";
+            label1.AutoSize = true;
+            label1.BackColor = System.Drawing.Color.Transparent;
+            label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label1.ForeColor = System.Drawing.SystemColors.Control;
+            label1.Location = new System.Drawing.Point(12, 102);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(37, 20);
+            label1.TabIndex = 7;
+            label1.Text = "City:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.Color.Transparent;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.ForeColor = System.Drawing.SystemColors.Control;
-            this.label2.Location = new System.Drawing.Point(12, 126);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(96, 20);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Temperature:";
+            label2.AutoSize = true;
+            label2.BackColor = System.Drawing.Color.Transparent;
+            label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label2.ForeColor = System.Drawing.SystemColors.Control;
+            label2.Location = new System.Drawing.Point(12, 126);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(96, 20);
+            label2.TabIndex = 8;
+            label2.Text = "Temperature:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.BackColor = System.Drawing.Color.Transparent;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.ForeColor = System.Drawing.SystemColors.Control;
-            this.label3.Location = new System.Drawing.Point(12, 151);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(88, 20);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Description:";
+            label3.AutoSize = true;
+            label3.BackColor = System.Drawing.Color.Transparent;
+            label3.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label3.ForeColor = System.Drawing.SystemColors.Control;
+            label3.Location = new System.Drawing.Point(12, 151);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(88, 20);
+            label3.TabIndex = 9;
+            label3.Text = "Description:";
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.BackColor = System.Drawing.Color.Transparent;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.ForeColor = System.Drawing.SystemColors.Control;
-            this.label4.Location = new System.Drawing.Point(12, 175);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(73, 20);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "Humidity:";
+            label4.AutoSize = true;
+            label4.BackColor = System.Drawing.Color.Transparent;
+            label4.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label4.ForeColor = System.Drawing.SystemColors.Control;
+            label4.Location = new System.Drawing.Point(12, 175);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(73, 20);
+            label4.TabIndex = 10;
+            label4.Text = "Humidity:";
             // 
             // cityListBox
             // 
-            this.cityListBox.FormattingEnabled = true;
-            this.cityListBox.ItemHeight = 15;
-            this.cityListBox.Location = new System.Drawing.Point(12, 29);
-            this.cityListBox.Name = "cityListBox";
-            this.cityListBox.Size = new System.Drawing.Size(332, 94);
-            this.cityListBox.TabIndex = 11;
-            this.cityListBox.Visible = false;
+            cityListBox.FormattingEnabled = true;
+            cityListBox.ItemHeight = 15;
+            cityListBox.Location = new System.Drawing.Point(12, 29);
+            cityListBox.Name = "cityListBox";
+            cityListBox.Size = new System.Drawing.Size(332, 94);
+            cityListBox.TabIndex = 11;
+            cityListBox.Visible = false;
             // 
             // timeLabel
             // 
-            this.timeLabel.AutoSize = true;
-            this.timeLabel.BackColor = System.Drawing.Color.Transparent;
-            this.timeLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.timeLabel.Location = new System.Drawing.Point(492, 426);
-            this.timeLabel.Name = "timeLabel";
-            this.timeLabel.Size = new System.Drawing.Size(0, 15);
-            this.timeLabel.TabIndex = 12;
+            timeLabel.AutoSize = true;
+            timeLabel.BackColor = System.Drawing.Color.Transparent;
+            timeLabel.ForeColor = System.Drawing.SystemColors.Control;
+            timeLabel.Location = new System.Drawing.Point(492, 426);
+            timeLabel.Name = "timeLabel";
+            timeLabel.Size = new System.Drawing.Size(0, 15);
+            timeLabel.TabIndex = 12;
             // 
             // weatherPictureBox
             // 
-            this.weatherPictureBox.BackColor = System.Drawing.Color.Transparent;
-            this.weatherPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.weatherPictureBox.Location = new System.Drawing.Point(255, 129);
-            this.weatherPictureBox.Name = "weatherPictureBox";
-            this.weatherPictureBox.Size = new System.Drawing.Size(50, 50);
-            this.weatherPictureBox.TabIndex = 13;
-            this.weatherPictureBox.TabStop = false;
+            weatherPictureBox.BackColor = System.Drawing.Color.Transparent;
+            weatherPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            weatherPictureBox.Location = new System.Drawing.Point(247, 129);
+            weatherPictureBox.Name = "weatherPictureBox";
+            weatherPictureBox.Size = new System.Drawing.Size(50, 50);
+            weatherPictureBox.TabIndex = 13;
+            weatherPictureBox.TabStop = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.BackgroundImage = global::WeatherAPI.Properties.Resources.background;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(358, 202);
-            this.Controls.Add(this.cityListBox);
-            this.Controls.Add(this.weatherPictureBox);
-            this.Controls.Add(this.timeLabel);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.searchButton);
-            this.Controls.Add(this.humidityLabel);
-            this.Controls.Add(this.descriptionLabel);
-            this.Controls.Add(this.temperatureLabel);
-            this.Controls.Add(this.cityLabel);
-            this.Controls.Add(this.cityTextBox);
-            this.DoubleBuffered = true;
-            this.Name = "Form1";
-            this.Text = "Weather App";
-            ((System.ComponentModel.ISupportInitialize)(this.weatherPictureBox)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            BackgroundImage = Properties.Resources.background;
+            BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            ClientSize = new System.Drawing.Size(358, 202);
+            Controls.Add(cityListBox);
+            Controls.Add(weatherPictureBox);
+            Controls.Add(timeLabel);
+            Controls.Add(label4);
+            Controls.Add(label3);
+            Controls.Add(label2);
+            Controls.Add(label1);
+            Controls.Add(searchButton);
+            Controls.Add(humidityLabel);
+            Controls.Add(descriptionLabel);
+            Controls.Add(temperatureLabel);
+            Controls.Add(cityLabel);
+            Controls.Add(cityTextBox);
+            DoubleBuffered = true;
+            Name = "Form1";
+            Text = "Weather App";
+            ((System.ComponentModel.ISupportInitialize)weatherPictureBox).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
