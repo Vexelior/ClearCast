@@ -44,8 +44,10 @@ namespace WeatherAPI
         private async void FindWeatherDetails(string city, string region, string country)
         {
             using HttpClient client = new();
-            UriBuilder builder = new(OpenWeatherMapApiUrl);
-            builder.Query = $"q={city},{region},{country}&appid={OpenWeatherMapApiKey}&units=metric";
+            UriBuilder builder = new(OpenWeatherMapApiUrl)
+            {
+                Query = $"q={city},{region},{country}&appid={OpenWeatherMapApiKey}&units=metric"
+            };
             try
             {
                 string json = await client.GetStringAsync(builder.ToString());
@@ -99,7 +101,7 @@ namespace WeatherAPI
                 weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 
                 // Close the PleaseWaitForm if it is open.
-                if (Application.OpenForms.OfType<PleaseWaitForm>().Count() != 0)
+                if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
                 {
                     Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
                 }
@@ -170,16 +172,16 @@ namespace WeatherAPI
 
         private async void Search(object sender, EventArgs e)
         {
-            string city = "";
-            string region = "";
-            string country = "";
+            string city;
+            string region = string.Empty;
+            string country = string.Empty;
 
             // Disable the search button. \\
             searchButton.Enabled = false;
             searchButton.Cursor = Cursors.No;
 
             // If there is a comma in the city name, split the string into city and region. \\
-            if (cityTextBox.Text.Contains(","))
+            if (cityTextBox.Text.Contains(','))
             {
                 string[] cityInfo = cityTextBox.Text.Split(",");
                 city = cityInfo[0];
@@ -238,8 +240,10 @@ namespace WeatherAPI
             string zipCode = await GetZipCode(city, region, country);
 
             using HttpClient client = new();
-            UriBuilder builder = new(OpenWeatherMapApiUrl);
-            builder.Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric";
+            UriBuilder builder = new(OpenWeatherMapApiUrl)
+            {
+                Query = $"zip={zipCode}&appid={OpenWeatherMapApiKey}&units=metric"
+            };
             HttpResponseMessage response = client.GetAsync(builder.ToString()).Result;
 
             if (response != null)
@@ -275,8 +279,7 @@ namespace WeatherAPI
 
 
             string url = $"https://api.zippopotam.us/{country}/{region}/{city}";
-            string zipCode = "";
-            string result = "";
+            string result = string.Empty;
 
             try
             {
@@ -296,7 +299,7 @@ namespace WeatherAPI
             }
 
             dynamic json = JsonConvert.DeserializeObject(result);
-            zipCode = json.places[0]["post code"];
+            string zipCode = json.places[0]["post code"];
 
             return zipCode;
         }
@@ -310,7 +313,7 @@ namespace WeatherAPI
             city = city[0].ToString().ToUpper() + city[1..];
 
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={city},{countryName}&key={OpenCageKey}&language=en&pretty=1";
-            string zipCode = "";
+            string zipCode = string.Empty;
 
             try
             {
@@ -351,7 +354,7 @@ namespace WeatherAPI
         private static string GetCountryZipCode(string lat, string lng)
         {
             string url = $"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lng}&key={OpenCageKey}&language=en&pretty=1";
-            string zipCode = "";
+            string zipCode = string.Empty;
 
             try
             {
@@ -387,7 +390,7 @@ namespace WeatherAPI
 
         private static string GetCountryCode(string country)
         {
-            string code = "";
+            string code = string.Empty;
             string url = $"https://restcountries.com/v3.1/name/{country}";
 
             using HttpClient client = new();
@@ -675,11 +678,10 @@ namespace WeatherAPI
         // Write a method to get the weather icon from the API using the description. \\
         private static string GetWeatherIconCode(string description)
         {
-            string weatherCode = string.Empty;
             description = description.ToLower();
 
             // Switch statement to find the weather icon code. \\
-            weatherCode = description switch
+            string weatherCode = description switch
             {
                 "clear sky" => "01d",
                 "few clouds" => "02d",
