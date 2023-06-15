@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             cityTextBox = new System.Windows.Forms.TextBox();
             cityLabel = new System.Windows.Forms.Label();
             temperatureLabel = new System.Windows.Forms.Label();
@@ -194,6 +195,9 @@
             Controls.Add(cityLabel);
             Controls.Add(cityTextBox);
             DoubleBuffered = true;
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
             Name = "Form1";
             Text = "Weather App";
             ((System.ComponentModel.ISupportInitialize)weatherPictureBox).EndInit();
