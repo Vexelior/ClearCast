@@ -39,7 +39,6 @@
             label3 = new System.Windows.Forms.Label();
             label4 = new System.Windows.Forms.Label();
             cityListBox = new System.Windows.Forms.ListBox();
-            timeLabel = new System.Windows.Forms.Label();
             weatherPictureBox = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)weatherPictureBox).BeginInit();
             SuspendLayout();
@@ -58,7 +57,7 @@
             cityLabel.BackColor = System.Drawing.Color.Transparent;
             cityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             cityLabel.ForeColor = System.Drawing.SystemColors.Control;
-            cityLabel.Location = new System.Drawing.Point(55, 102);
+            cityLabel.Location = new System.Drawing.Point(55, 78);
             cityLabel.Name = "cityLabel";
             cityLabel.Size = new System.Drawing.Size(0, 20);
             cityLabel.TabIndex = 1;
@@ -69,7 +68,7 @@
             temperatureLabel.BackColor = System.Drawing.Color.Transparent;
             temperatureLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             temperatureLabel.ForeColor = System.Drawing.SystemColors.Control;
-            temperatureLabel.Location = new System.Drawing.Point(114, 126);
+            temperatureLabel.Location = new System.Drawing.Point(114, 102);
             temperatureLabel.Name = "temperatureLabel";
             temperatureLabel.Size = new System.Drawing.Size(0, 20);
             temperatureLabel.TabIndex = 2;
@@ -80,7 +79,7 @@
             descriptionLabel.BackColor = System.Drawing.Color.Transparent;
             descriptionLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             descriptionLabel.ForeColor = System.Drawing.SystemColors.Control;
-            descriptionLabel.Location = new System.Drawing.Point(106, 151);
+            descriptionLabel.Location = new System.Drawing.Point(106, 127);
             descriptionLabel.Name = "descriptionLabel";
             descriptionLabel.Size = new System.Drawing.Size(0, 20);
             descriptionLabel.TabIndex = 3;
@@ -91,7 +90,7 @@
             humidityLabel.BackColor = System.Drawing.Color.Transparent;
             humidityLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             humidityLabel.ForeColor = System.Drawing.SystemColors.Control;
-            humidityLabel.Location = new System.Drawing.Point(91, 175);
+            humidityLabel.Location = new System.Drawing.Point(91, 151);
             humidityLabel.Name = "humidityLabel";
             humidityLabel.Size = new System.Drawing.Size(0, 20);
             humidityLabel.TabIndex = 4;
@@ -112,7 +111,7 @@
             label1.BackColor = System.Drawing.Color.Transparent;
             label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             label1.ForeColor = System.Drawing.SystemColors.Control;
-            label1.Location = new System.Drawing.Point(12, 102);
+            label1.Location = new System.Drawing.Point(12, 78);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(37, 20);
             label1.TabIndex = 7;
@@ -124,7 +123,7 @@
             label2.BackColor = System.Drawing.Color.Transparent;
             label2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             label2.ForeColor = System.Drawing.SystemColors.Control;
-            label2.Location = new System.Drawing.Point(12, 126);
+            label2.Location = new System.Drawing.Point(12, 102);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(96, 20);
             label2.TabIndex = 8;
@@ -136,7 +135,7 @@
             label3.BackColor = System.Drawing.Color.Transparent;
             label3.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             label3.ForeColor = System.Drawing.SystemColors.Control;
-            label3.Location = new System.Drawing.Point(12, 151);
+            label3.Location = new System.Drawing.Point(12, 127);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(88, 20);
             label3.TabIndex = 9;
@@ -148,7 +147,7 @@
             label4.BackColor = System.Drawing.Color.Transparent;
             label4.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             label4.ForeColor = System.Drawing.SystemColors.Control;
-            label4.Location = new System.Drawing.Point(12, 175);
+            label4.Location = new System.Drawing.Point(12, 151);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(73, 20);
             label4.TabIndex = 10;
@@ -158,27 +157,17 @@
             // 
             cityListBox.FormattingEnabled = true;
             cityListBox.ItemHeight = 15;
-            cityListBox.Location = new System.Drawing.Point(12, 29);
+            cityListBox.Location = new System.Drawing.Point(12, 30);
             cityListBox.Name = "cityListBox";
             cityListBox.Size = new System.Drawing.Size(332, 94);
             cityListBox.TabIndex = 11;
             cityListBox.Visible = false;
             // 
-            // timeLabel
-            // 
-            timeLabel.AutoSize = true;
-            timeLabel.BackColor = System.Drawing.Color.Transparent;
-            timeLabel.ForeColor = System.Drawing.SystemColors.Control;
-            timeLabel.Location = new System.Drawing.Point(492, 426);
-            timeLabel.Name = "timeLabel";
-            timeLabel.Size = new System.Drawing.Size(0, 15);
-            timeLabel.TabIndex = 12;
-            // 
             // weatherPictureBox
             // 
             weatherPictureBox.BackColor = System.Drawing.Color.Transparent;
             weatherPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            weatherPictureBox.Location = new System.Drawing.Point(247, 129);
+            weatherPictureBox.Location = new System.Drawing.Point(266, 97);
             weatherPictureBox.Name = "weatherPictureBox";
             weatherPictureBox.Size = new System.Drawing.Size(50, 50);
             weatherPictureBox.TabIndex = 13;
@@ -194,7 +183,6 @@
             ClientSize = new System.Drawing.Size(358, 202);
             Controls.Add(cityListBox);
             Controls.Add(weatherPictureBox);
-            Controls.Add(timeLabel);
             Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -226,7 +214,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ListBox cityListBox;
-        private System.Windows.Forms.Label timeLabel;
         private System.Windows.Forms.PictureBox weatherPictureBox;
     }
 }

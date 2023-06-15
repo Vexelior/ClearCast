@@ -6,10 +6,8 @@ using System.Windows.Forms;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Net;
 using System.Linq;
 using static WeatherAPI.API;
-using System.Drawing;
 using System.Configuration;
 using System.IO;
 
@@ -100,15 +98,10 @@ namespace WeatherAPI
 
                 weatherPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 
-                // Close the PleaseWaitForm if it is open.
-                if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
-                {
-                    Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
-                }
-
                 // Enable the search button. \\
                 searchButton.Enabled = true;
                 searchButton.Cursor = Cursors.Default;
+                Cursor.Current = Cursors.Default;
 
                 // Clear the cityListBox. \\
                 cityListBox.Items.Clear();
@@ -117,6 +110,7 @@ namespace WeatherAPI
             catch (Exception ex)
             {
                 ErrorMessage($"Error finding weather details!\n\n{ex.Message}");
+                Cursor.Current = Cursors.Default;
             }
         }
 
@@ -160,6 +154,7 @@ namespace WeatherAPI
 
         private async void SearchByLocation()
         {
+            Cursor.Current = Cursors.AppStarting;
             List<string> city = await GetUserLocation();
 
             if (city != null)
@@ -167,6 +162,7 @@ namespace WeatherAPI
                 // Find possible region and country for the city entered. \\
                 FindWeatherDetails(city[0], city[1], city[2]);
             }
+            Cursor.Current = Cursors.Default;
         }
 
 
@@ -179,6 +175,10 @@ namespace WeatherAPI
             // Disable the search button. \\
             searchButton.Enabled = false;
             searchButton.Cursor = Cursors.No;
+
+            // Set Cursor to WaitCursor. \\
+            Cursor.Current = Cursors.WaitCursor;
+
 
             // If there is a comma in the city name, split the string into city and region. \\
             if (cityTextBox.Text.Contains(','))
@@ -219,7 +219,6 @@ namespace WeatherAPI
             {
                 try
                 {
-                    ShowLoadingMessage();
                     List<string> locationDetails = await LocationDetails(city, region, country);
                     FindWeatherDetails(locationDetails[0], locationDetails[1], locationDetails[2]);
                 }
@@ -515,9 +514,6 @@ namespace WeatherAPI
                         }
                     }
 
-                    // Write the indices of the list of cities to the console. \\
-
-
                     cityListBox.Visible = true;
 
                     if (cityListBox.Visible == true)
@@ -642,24 +638,6 @@ namespace WeatherAPI
             {
                 cityListBox.Visible = false;
             }
-        }
-
-
-        private static void ShowLoadingMessage()
-        {
-            PleaseWaitForm loadingForm = new();
-
-            // If there is more than one instance of PleaseWaitForm, close it. \\
-            if (Application.OpenForms.OfType<PleaseWaitForm>().Any())
-            {
-                Application.OpenForms.OfType<PleaseWaitForm>().First().Close();
-            }
-
-            // Place the PleaseWaitForm in the center of the the application. \\
-            loadingForm.StartPosition = FormStartPosition.CenterScreen;
-
-            // Show the PleaseWaitForm. \\
-            loadingForm.Show();
         }
 
 
