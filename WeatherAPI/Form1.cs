@@ -10,6 +10,7 @@ using System.Linq;
 using static WeatherAPI.API;
 using System.Configuration;
 using System.IO;
+using System.Diagnostics;
 
 namespace WeatherAPI
 {
@@ -488,32 +489,46 @@ namespace WeatherAPI
             string city = cityTextBox.Text;
 
             // Call an API to retrieve a list of cities that match the user's input. \\
-            if (!string.IsNullOrEmpty(city))
+            if (!string.IsNullOrEmpty(city) && city.Length > 3)
             {
                 List<string> cityList = new();
 
                 try
                 {
-                    using (HttpClient webClient = new())
+                    var client = new HttpClient();
+                    var request = new HttpRequestMessage
                     {
-                        string json = webClient.GetStringAsync($"https://api.teleport.org/api/cities/?search={city}").Result;
-                        JObject jsonQuery = JObject.Parse(json);
-                        JArray cities = jsonQuery["_embedded"]["city:search-results"] as JArray;
+                        Method = HttpMethod.Get,
+                        RequestUri = new Uri($"https://andruxnet-world-cities-v1.p.rapidapi.com/?query={city}&searchby=city"),
+                        Headers =
+                                {
+                                    { "X-RapidAPI-Key", "15acfbf2bemsh3880ee9c31a022cp1b859djsn11bbb3c3fa09" },
+                                    { "X-RapidAPI-Host", "andruxnet-world-cities-v1.p.rapidapi.com" },
+                                },
+                    };
 
-                        // Display the list of cities in a listbox. \\
-                        cityListBox.Items.Clear();
-                        foreach (JObject cityObject in cities.Cast<JObject>())
-                        {
-                            string cityName = cityObject["matching_full_name"].ToString();
-                            cityListBox.Items.Add(cityName);
+                    using HttpResponseMessage response = client.SendAsync(request).Result;
+                    string result = response.Content.ReadAsStringAsync().Result;
 
-                            foreach (string item in cityListBox.Items)
-                            {
-                                cityList.Add(item);
-                            }
-                        }
+                    JArray resultsArray = JArray.Parse(result);
+
+                    foreach (var item in resultsArray)
+                    {
+                        // Access the properties of each item in the array
+                        string cityResults = item["city"].ToString();
+                        string stateResults = item["state"].ToString();
+                        string countryResults = item["country"].ToString();
+                        
+                        // Add the city, state, and country to the list. \\
+                        cityList.Add($"{cityResults}, {stateResults}, {countryResults}");
                     }
 
+                    // Add the list of cities to the listbox. \\
+                    cityListBox.Items.Clear();
+                    cityListBox.Items.AddRange(cityList.ToArray());
+                    cityListBox.SelectedIndex = 0;
+
+                    // Show the listbox. \\
                     cityListBox.Visible = true;
 
                     if (cityListBox.Visible == true)
@@ -631,7 +646,7 @@ namespace WeatherAPI
                 }
                 catch (Exception ex)
                 {
-                    ErrorMessage($"Error retrieving cities!\n\n{ex.Message}");
+                    ErrorMessage($"Error retrieving city list!\n\n{ex.Message}");
                 }
             }
             else
